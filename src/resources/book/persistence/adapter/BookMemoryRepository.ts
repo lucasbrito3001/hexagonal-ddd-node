@@ -1,8 +1,8 @@
-import { StockBookDTO } from "../../controller/dto/stock-book.dto";
-import { Book } from "../../domain/book.model";
-import { BookRepository } from "./book.repository.port";
+import { StockBookDTO } from "../../controller/dto/StockBookDto";
+import { Book } from "../../domain/Book";
+import { BookRepositoryPort } from "../port/BookRepositoryPort";
 
-export class BookMemoryRepository implements BookRepository {
+export class BookMemoryRepository implements BookRepositoryPort {
 	private books: Book[] = [];
 
 	async save(stockBookDTO: StockBookDTO): Promise<void> {

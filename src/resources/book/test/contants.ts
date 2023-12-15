@@ -1,4 +1,4 @@
-import { StockBookDTO } from "../controller/dto/stock-book.dto";
+import { StockBookDTO } from "../controller/dto/StockBookDto";
 
 export const INPUT_BOOK: StockBookDTO = {
 	title: "Domain-Driven Design",

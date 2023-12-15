@@ -1,7 +1,7 @@
-import { StockBookDTO } from "../../controller/dto/stock-book.dto";
-import { Book } from "../../domain/book.model";
+import { StockBookDTO } from "../../controller/dto/StockBookDto";
+import { Book } from "../../domain/Book";
 
-export interface BookRepository {
+export interface BookRepositoryPort {
 	save(stockBook: StockBookDTO): Promise<void>;
 	update(id: string, stockBook: StockBookDTO): Promise<void>;
 	search(title: string): Promise<Book[]>;

@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { StockBookDTO } from "../controller/dto/stock-book.dto";
+import { StockBookDTO } from "../controller/dto/StockBookDto";
 
 export class Book {
 	constructor(
@@ -25,11 +25,21 @@ export class Book {
 			bookDTO.edition,
 			bookDTO.author,
 			bookDTO.release,
-			bookDTO.cover,
+			this.coverFilename(bookDTO.title, bookDTO.edition, "jpg"),
 			bookDTO.quantity,
 			false
 		);
 
 		return book;
+	};
+
+	static coverFilename = (
+		title: string,
+		edition: number,
+		extension: string
+	): string => {
+		return `${title}_${edition}ed.${extension}`
+			.toLowerCase()
+			.replace(/\s/g, "_");
 	};
 }

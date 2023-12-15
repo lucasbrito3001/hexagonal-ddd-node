@@ -18,10 +18,8 @@ export class ErrorBase<T extends string> extends Error {
 	}
 }
 
-export class UnexpectedError extends Error {
-	name: string = "UNEXPECTED_ERROR";
-
+export class UnexpectedError extends ErrorBase<"UNEXPECTED_ERROR"> {
 	constructor() {
-		super("An unexpected error occurred.");
+		super("UNEXPECTED_ERROR", "An unexpected error occurred.");
 	}
 }

@@ -1,9 +1,9 @@
 import { Like, Repository } from "typeorm";
-import { BookRepository } from "./book.repository.port";
-import { StockBookDTO } from "../../controller/dto/stock-book.dto";
-import { Book } from "../../domain/book.model";
+import { BookRepositoryPort } from "../port/BookRepositoryPort";
+import { StockBookDTO } from "../../controller/dto/StockBookDto";
+import { Book } from "../../domain/Book";
 
-export class BookDatabaseRepository implements BookRepository {
+export class BookRepositoryDatabase implements BookRepositoryPort {
 	constructor(private readonly bookRepository: Repository<Book>) {}
 
 	async save(stockBookDTO: StockBookDTO): Promise<void> {
