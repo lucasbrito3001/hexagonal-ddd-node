@@ -1,14 +1,12 @@
 import {
 	StockBookDTO,
 	StockBookDTOSchema,
-} from "../controller/dto/StockBookDto";
-import { StockBookPort } from "./adapter/StockBookPort";
-import { Book } from "../domain/Book";
-import { BookRepositoryPort } from "../persistence/port/BookRepositoryPort";
-import { BookError, ERRORS_DATA } from "../BookError";
-import { BookFileStoragePort } from "../persistence/port/BookFileStoragePort";
-
-const { DUPLICATED_BOOK, INVALID_DTO } = ERRORS_DATA;
+} from "../../controller/dto/StockBookDto";
+import { StockBookPort } from "../port/StockBookPort";
+import { Book } from "../../domain/Book";
+import { BookRepositoryPort } from "../../persistence/port/BookRepositoryPort";
+import { BookError } from "../../BookResult";
+import { BookFileStoragePort } from "../../persistence/port/BookFileStoragePort";
 
 export class StockBookUseCase implements StockBookPort {
 	constructor(
@@ -17,19 +15,17 @@ export class StockBookUseCase implements StockBookPort {
 		private readonly idGenerator: () => `${string}-${string}-${string}-${string}-${string}`
 	) {}
 
-	execute = async (stockBookDTO: StockBookDTO): Promise<Book> => {
+	execute = async (stockBookDTO: StockBookDTO): Promise<Book | BookError> => {
 		const schemaValidation = StockBookDTOSchema.safeParse(stockBookDTO);
 
-		if (!schemaValidation.success)
-			throw new BookError("INVALID_DTO", INVALID_DTO.message);
+		if (!schemaValidation.success) return new BookError("INVALID_DTO");
 
 		const duplicatedBook = await this.bookRepository.getByTitleAndEdition(
 			schemaValidation.data.title,
 			schemaValidation.data.edition
 		);
 
-		if (duplicatedBook !== null)
-			throw new BookError("DUPLICATED_BOOK", DUPLICATED_BOOK.message);
+		if (duplicatedBook !== null) return new BookError("DUPLICATED_BOOK");
 
 		const book = Book.register(schemaValidation.data, this.idGenerator);
 

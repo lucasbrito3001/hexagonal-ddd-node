@@ -1,7 +1,7 @@
 import { ReqBody } from "@/application/decorators/reqBody.decorator";
-import { StockBookPort } from "../usecase/adapter/StockBookPort";
+import { StockBookPort } from "../usecase/port/StockBookPort";
 import { StockBookDTO } from "./dto/StockBookDto";
-import { BookError } from "../BookError";
+import { BookError } from "../BookResult";
 import { UnexpectedError } from "@/resources/error";
 import { Book } from "../domain/Book";
 

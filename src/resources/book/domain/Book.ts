@@ -27,7 +27,7 @@ export class Book {
 			bookDTO.release,
 			this.coverFilename(bookDTO.title, bookDTO.edition, "jpg"),
 			bookDTO.quantity,
-			false
+			bookDTO.isVisible || false
 		);
 
 		return book;

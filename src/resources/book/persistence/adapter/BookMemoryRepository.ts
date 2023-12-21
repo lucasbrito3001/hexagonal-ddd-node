@@ -6,12 +6,12 @@ export class BookMemoryRepository implements BookRepositoryPort {
 	private books: Book[] = [];
 
 	async save(stockBookDTO: StockBookDTO): Promise<void> {
-		const book = Book.register(stockBookDTO);
+		const book = Book.register(stockBookDTO, () => "0-0-0-0-0");
 		this.books.push(book);
 	}
 
 	async update(id: string, stockBookDTO: StockBookDTO): Promise<void> {
-		const book = Book.register(stockBookDTO);
+		const book = Book.register(stockBookDTO, () => "0-0-0-0-0");
 		const index = this.books.findIndex((stock) => stock.id === id);
 		this.books[index] = book;
 	}
@@ -33,5 +33,9 @@ export class BookMemoryRepository implements BookRepositoryPort {
 
 	async search(title: string): Promise<Book[]> {
 		return this.books.filter((stock) => stock.title === title);
+	}
+
+	async searchByIds(ids: string[]): Promise<Book[]> {
+		return this.books.filter((stock) => ids.includes(stock.id));
 	}
 }

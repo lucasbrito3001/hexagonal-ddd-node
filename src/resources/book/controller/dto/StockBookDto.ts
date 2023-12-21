@@ -7,6 +7,7 @@ export const StockBookDTOSchema = z.object({
 	release: z.string().datetime(),
 	cover: z.string().url(),
 	quantity: z.number().nonnegative(),
+	isVisible: z.boolean().optional(),
 });
 
 export type StockBookDTO = z.infer<typeof StockBookDTOSchema>;

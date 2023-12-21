@@ -1,15 +1,13 @@
 import { beforeEach, describe, test } from "node:test";
-import { ok, rejects, throws } from "node:assert";
-import { StockBookUseCase } from "../usecase/StockBookUseCase";
-import { GetStockedBooksUseCase } from "../usecase/GetStockedBooksUseCase";
+import { deepEqual, ok } from "node:assert";
+import { StockBookUseCase } from "../usecase/adapter/StockBookUseCase";
+import { GetStockedBooksUseCase } from "../usecase/adapter/GetStockedBooksUseCase";
 import { BookMemoryRepository } from "../persistence/adapter/BookMemoryRepository";
 import { Book } from "../domain/Book";
 import { INPUT_BOOK } from "./contants";
 import { StockBookDTO } from "../controller/dto/StockBookDto";
-import { BookError, ERRORS_DATA } from "../BookError";
+import { BookError } from "../BookResult";
 import { BookLocalFileStorage } from "../persistence/adapter/BookLocalFileStorage";
-
-const { INVALID_DTO, DUPLICATED_BOOK } = ERRORS_DATA;
 
 describe("StockBookUseCase", () => {
 	let stockBookUseCase: StockBookUseCase;
@@ -39,20 +37,21 @@ describe("StockBookUseCase", () => {
 		ok(Array.isArray(stockedBooks) && stockedBooks.length === 1);
 	});
 
-	test("should return INVALID_DTO error", () => {
+	test("should return INVALID_DTO error", async () => {
 		const { title, ...INVALID_BOOK_DTO } = INPUT_BOOK;
 
-		const usecase = async () =>
-			await stockBookUseCase.execute(INVALID_BOOK_DTO as StockBookDTO);
+		const bookOrError = await stockBookUseCase.execute(
+			INVALID_BOOK_DTO as StockBookDTO
+		);
 
-		rejects(usecase, new BookError("INVALID_DTO", INVALID_DTO.message));
+		deepEqual(bookOrError, new BookError("INVALID_DTO"));
 	});
 
 	test("should return DUPLICATED_BOOK error", async () => {
 		await bookMemoryRepository.save(INPUT_BOOK);
 
-		const usecase = async () => await stockBookUseCase.execute(INPUT_BOOK);
+		const bookOrError = await stockBookUseCase.execute(INPUT_BOOK);
 
-		rejects(usecase, new BookError("DUPLICATED_BOOK", DUPLICATED_BOOK.message));
+		deepEqual(bookOrError, new BookError("DUPLICATED_BOOK"));
 	});
 });

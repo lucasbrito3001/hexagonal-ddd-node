@@ -1,13 +1,11 @@
 import { describe, test } from "node:test";
-import { ok, rejects } from "node:assert";
-import { GetStockedBooksUseCase } from "../usecase/GetStockedBooksUseCase";
-import { StockBookUseCase } from "../usecase/StockBookUseCase";
+import { deepEqual, ok } from "node:assert";
+import { GetStockedBooksUseCase } from "../usecase/adapter/GetStockedBooksUseCase";
+import { StockBookUseCase } from "../usecase/adapter/StockBookUseCase";
 import { BookMemoryRepository } from "../persistence/adapter/BookMemoryRepository";
 import { INPUT_BOOK } from "./contants";
-import { BookError, ERRORS_DATA } from "../BookError";
+import { BookError } from "../BookResult";
 import { BookLocalFileStorage } from "../persistence/adapter/BookLocalFileStorage";
-
-const { BOOK_NOT_FOUND } = ERRORS_DATA;
 
 describe("GetStockedBooksUseCase", () => {
 	test("should get stocked books", async () => {
@@ -30,8 +28,8 @@ describe("GetStockedBooksUseCase", () => {
 		const bookMemoryRepository = new BookMemoryRepository();
 		const getStock = new GetStockedBooksUseCase(bookMemoryRepository);
 
-		const usecase = async () => await getStock.execute("Domain-Driven Design");
+		const booksOrError = await getStock.execute("Domain-Driven Design");
 
-		rejects(usecase, new BookError("BOOK_NOT_FOUND", BOOK_NOT_FOUND.message));
+		deepEqual(booksOrError, new BookError("BOOK_NOT_FOUND"));
 	});
 });

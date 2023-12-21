@@ -1,10 +1,15 @@
 import { StockBookDTO } from "../../controller/dto/StockBookDto";
 import { Book } from "../../domain/Book";
+import { BookEntity } from "../BookEntity";
 
 export interface BookRepositoryPort {
-	save(stockBook: StockBookDTO): Promise<void>;
-	update(id: string, stockBook: StockBookDTO): Promise<void>;
-	search(title: string): Promise<Book[]>;
-	get(id: string): Promise<Book | null>;
-	getByTitleAndEdition(title: string, edition: number): Promise<Book | null>;
+	save(stockBook: Book): Promise<void>;
+	update(id: string, stockBook: Book): Promise<void>;
+	search(title: string): Promise<BookEntity[]>;
+	get(id: string): Promise<BookEntity | null>;
+	searchByIds(ids: string[]): Promise<BookEntity[]>;
+	getByTitleAndEdition(
+		title: string,
+		edition: number
+	): Promise<BookEntity | null>;
 }
