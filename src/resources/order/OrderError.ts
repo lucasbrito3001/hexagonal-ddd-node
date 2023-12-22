@@ -1,4 +1,4 @@
-import { ErrorBase, ErrorsData } from "../error";
+import { ErrorBase, ErrorsData } from "../ErrorBase";
 
 type OrderErrorNames = "BOOK_NOT_FOUND" | "BOOK_UNAVAILABLE" | "INVALID_DTO";
 

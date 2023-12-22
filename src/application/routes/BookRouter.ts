@@ -6,14 +6,14 @@ import { StockBookUseCase } from "@/resources/book/usecase/adapter/StockBookUseC
 import { Storage } from "@google-cloud/storage";
 import { Router } from "express";
 import { randomUUID } from "node:crypto";
-import { getRepository } from "typeorm";
+import { DataSource, getRepository } from "typeorm";
 
 export class BookRouter {
 	private bookController: BookController;
 
-	constructor(public router: Router) {
+	constructor(private router: Router, private dataSource: DataSource) {
 		// persistence port
-		const repository = getRepository(BookEntity);
+		const repository = dataSource.getRepository(BookEntity);
 		const bucket = new Storage().bucket("book-covers-stock");
 
 		// persistence adapters
@@ -32,5 +32,6 @@ export class BookRouter {
 
 	expose() {
 		this.router.post("/", this.bookController.stock);
+		this.router.get("/", this.bookController.search);
 	}
 }

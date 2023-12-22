@@ -1,5 +1,5 @@
 import { ReqBody } from "@/application/decorators/reqBody.decorator";
-import { UnexpectedError } from "@/resources/error";
+import { UnexpectedError } from "@/resources/ErrorBase";
 import { RegisterOrderDTO } from "./dto/RegisterOrderDto";
 import { RegisterOrderPort } from "../usecase/port/RegisterOrderPort";
 import { OrderError } from "../OrderError";

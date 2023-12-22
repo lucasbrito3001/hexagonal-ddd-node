@@ -2,7 +2,7 @@ import { ReqBody } from "@/application/decorators/reqBody.decorator";
 import { StockBookPort } from "../usecase/port/StockBookPort";
 import { StockBookDTO } from "./dto/StockBookDto";
 import { BookError } from "../BookResult";
-import { UnexpectedError } from "@/resources/error";
+import { UnexpectedError } from "@/resources/ErrorBase";
 import { Book } from "../domain/Book";
 
 export class BookController {
@@ -22,4 +22,6 @@ export class BookController {
 			return new UnexpectedError();
 		}
 	}
+
+	async search() {}
 }

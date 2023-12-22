@@ -1,5 +1,5 @@
 import { Book } from "./domain/Book";
-import { ErrorBase, ErrorsData } from "../error";
+import { ErrorBase, ErrorsData } from "../ErrorBase";
 
 type BookErrorNames = "INVALID_DTO" | "DUPLICATED_BOOK" | "BOOK_NOT_FOUND";
 
