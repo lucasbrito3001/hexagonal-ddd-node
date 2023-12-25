@@ -1,4 +1,6 @@
 import { ErrorBase, ErrorsData } from "@/resources/ErrorBase";
+import { BookEntity } from "@/resources/book/persistence/book.entity";
+import { OrderEntity } from "@/resources/order/persistence/order.entity";
 import {
 	DataSource,
 	DataSourceOptions,
@@ -36,6 +38,7 @@ export class DataSourceConnection {
 			username: process.env.DS_USER || "",
 			password: process.env.DS_PASS || "",
 			database: process.env.DS_DATABASE || "",
+			entities: [BookEntity, OrderEntity],
 			synchronize: process.env.NODE_ENV !== "production",
 			logging: process.env.NODE_ENV !== "production",
 		};
@@ -45,11 +48,11 @@ export class DataSourceConnection {
 		return options;
 	}
 
-	async initialize(): Promise<void | DataSourceError> {
+	async initialize(): Promise<void> {
 		const config = this.getConfig();
 
 		if (config === undefined)
-			return new DataSourceError("BAD_DATASOURCE_CONFIG");
+			throw new DataSourceError("BAD_DATASOURCE_CONFIG");
 
 		this.connection = await new DataSource(config).initialize();
 	}
@@ -61,9 +64,9 @@ export class DataSourceConnection {
 		return this.connection.getRepository(entity);
 	}
 
-	async close(): Promise<void | DataSourceError> {
+	async close(): Promise<void> {
 		if (this.connection === undefined)
-			return new DataSourceError("DATASOURCE_CONNECTION_CLOSED");
+			throw new DataSourceError("DATASOURCE_CONNECTION_CLOSED");
 
 		await this.connection?.destroy();
 	}

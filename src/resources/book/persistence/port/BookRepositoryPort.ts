@@ -1,5 +1,5 @@
 import { Book } from "../../domain/Book";
-import { BookEntity } from "../BookEntity";
+import { BookEntity } from "../book.entity";
 
 export interface BookRepositoryPort {
 	save(book: Book): Promise<void>;

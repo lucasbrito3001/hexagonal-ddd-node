@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { BookEntity } from "@/resources/book/persistence/book.entity";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
 
-@Entity()
+@Entity("order")
 export class OrderEntity {
 	@PrimaryColumn("uuid")
 	id?: string;
@@ -29,6 +30,7 @@ export class OrderEntity {
 	@Column()
 	zipCode?: string;
 
-	@Column()
-	books?: string[];
+	@ManyToMany(() => BookEntity)
+	@JoinTable()
+	books?: BookEntity[];
 }

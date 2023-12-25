@@ -1,7 +1,7 @@
 import { In, Like, Repository } from "typeorm";
 import { BookRepositoryPort } from "../port/BookRepositoryPort";
 import { StockBookDTO } from "../../controller/dto/StockBookDto";
-import { BookEntity } from "../BookEntity";
+import { BookEntity } from "../book.entity";
 
 export class BookRepositoryDatabase implements BookRepositoryPort {
 	constructor(private readonly bookRepository: Repository<BookEntity>) {}

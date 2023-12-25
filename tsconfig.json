@@ -14,11 +14,12 @@
 		"forceConsistentCasingInFileNames": true,
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"baseUrl": "./",
+		"outDir": "./dist",
+		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"]
 		},
 		"strict": true
 	},
-	"include": ["src/**/*", "**/*.test.ts"]
+	"include": ["src/**/*", "index.ts"]
 }

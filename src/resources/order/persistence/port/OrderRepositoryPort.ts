@@ -1,5 +1,5 @@
 import { Order } from "../../domain/Order";
-import { OrderEntity } from "../OrderEntity";
+import { OrderEntity } from "../order.entity";
 
 export interface OrderRepositoryPort {
 	save(order: Order): Promise<void>;
