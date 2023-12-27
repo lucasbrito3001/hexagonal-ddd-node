@@ -1,4 +1,5 @@
 import { Storage, UploadOptions, UploadResponse } from "@google-cloud/storage";
+import { RetryOptions } from "@google-cloud/storage/build/cjs/src/storage";
 
 export type FileStorageCredentials = {
 	type: string;
@@ -17,22 +18,25 @@ export type FileStorageCredentials = {
 export type FileStorageBucketOptions = UploadOptions;
 
 export type FileStorageBucket = {
-	upload: (
+	upload(
 		path: string,
 		options: FileStorageBucketOptions
-	) => Promise<UploadResponse>;
+	): Promise<UploadResponse>;
 };
 
 export class FileStorage {
-	private storage: Storage;
+	public storage: Storage;
 
 	constructor(credentials: FileStorageCredentials) {
 		this.storage = new Storage({ credentials });
 	}
 
-	bucket(bucketName: string): FileStorageBucket {
-		const bucket = this.storage.bucket(bucketName);
+	bucket = (bucketName: string): FileStorageBucket => {
+		const storageBucket = this.storage.bucket(bucketName);
 
-		return { upload: bucket.upload };
-	}
+		return {
+			upload: (path: string, options: FileStorageBucketOptions) =>
+				storageBucket.upload(path, options),
+		};
+	};
 }

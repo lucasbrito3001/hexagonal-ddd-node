@@ -8,7 +8,7 @@ import {
 export class BookCoverCloudFileStorage implements BookFileStoragePort {
 	constructor(private readonly bookCoverBucket: FileStorageBucket) {}
 
-	async storeCover(filename: string): Promise<string> {
+	storeCover = async (filename: string): Promise<string> => {
 		const uploadOptions: FileStorageBucketOptions = {
 			destination: filename,
 		};
@@ -19,5 +19,5 @@ export class BookCoverCloudFileStorage implements BookFileStoragePort {
 		);
 
 		return file.baseUrl || "";
-	}
+	};
 }

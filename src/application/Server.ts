@@ -45,7 +45,7 @@ export class WebServer {
 		this.uploader = multer({ storage });
 	}
 
-	async start() {
+	start = async () => {
 		await this.dataSourceConnection.initialize();
 
 		const app = express();
@@ -57,9 +57,9 @@ export class WebServer {
 		this.application = app.listen(process.env.PORT, () => {
 			console.log("Server started, listening on port " + process.env.PORT);
 		});
-	}
+	};
 
-	private setRoutes(app: Express) {
+	private setRoutes = (app: Express) => {
 		CONFIG_ROUTERS.forEach((config_router) => {
 			const routes = express.Router();
 
@@ -75,11 +75,11 @@ export class WebServer {
 		app.get("/healthy", (req, res) => {
 			res.send("Hello world!");
 		});
-	}
+	};
 
-	gracefulShutdown() {
+	gracefulShutdown = () => {
 		if (!this.application) throw new WebServerError("WEB_SERVER_CLOSED");
 
 		this.application.close();
-	}
+	};
 }
