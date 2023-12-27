@@ -1,28 +1,28 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity("book")
 export class BookEntity {
-	@PrimaryGeneratedColumn("uuid")
+	@PrimaryColumn("uuid")
 	id?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	title?: string;
 
-    @Column()
-    edition?: number;
+	@Column({ type: "int" })
+	edition?: number;
 
-	@Column()
+	@Column({ type: "varchar" })
 	author?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	release?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	cover?: string;
 
-	@Column()
+	@Column({ type: "int" })
 	quantity?: number;
 
-	@Column()
+	@Column({ type: "bool" })
 	isVisible?: boolean;
 }

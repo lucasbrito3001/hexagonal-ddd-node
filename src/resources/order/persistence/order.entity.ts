@@ -6,28 +6,28 @@ export class OrderEntity {
 	@PrimaryColumn("uuid")
 	id?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	country?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	state?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	city?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	district?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	street?: string;
 
-	@Column()
+	@Column({ type: "int" })
 	number?: number;
 
-	@Column()
+	@Column({ type: "varchar" })
 	complement?: string;
 
-	@Column()
+	@Column({ type: "varchar" })
 	zipCode?: string;
 
 	@ManyToMany(() => BookEntity)

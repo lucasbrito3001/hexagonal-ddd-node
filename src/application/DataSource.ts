@@ -15,15 +15,21 @@ type DataSourceErrorNames =
 export const DATASOURCE_ERRORS: ErrorsData<DataSourceErrorNames> = {
 	BAD_DATASOURCE_CONFIG: {
 		message: "Error with database configuration.",
+		httpCode: 0,
 	},
 	DATASOURCE_CONNECTION_CLOSED: {
 		message: "Can't close the connection, it's already closed.",
+		httpCode: 0,
 	},
 };
 
 export class DataSourceError extends ErrorBase<DataSourceErrorNames> {
 	constructor(errorName: DataSourceErrorNames) {
-		super(errorName, DATASOURCE_ERRORS[errorName].message);
+		super(
+			errorName,
+			DATASOURCE_ERRORS[errorName].message,
+			DATASOURCE_ERRORS[errorName].httpCode
+		);
 	}
 }
 
@@ -39,8 +45,8 @@ export class DataSourceConnection {
 			password: process.env.DS_PASS || "",
 			database: process.env.DS_DATABASE || "",
 			entities: [BookEntity, OrderEntity],
-			synchronize: process.env.NODE_ENV !== "production",
-			logging: process.env.NODE_ENV !== "production",
+			synchronize: process.env.NODE_ENV !== "prd",
+			logging: process.env.NODE_ENV !== "prd",
 		};
 
 		if (Object.values(options).some((opt) => !opt)) return undefined;

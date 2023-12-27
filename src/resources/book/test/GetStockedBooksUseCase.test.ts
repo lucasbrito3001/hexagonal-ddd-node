@@ -24,6 +24,15 @@ describe("GetStockedBooksUseCase", () => {
 		ok(Array.isArray(stockedBooks) && stockedBooks.length === 1);
 	});
 
+	test("should return INVALID_TITLE error", async () => {
+		const bookMemoryRepository = new BookMemoryRepository();
+		const getStock = new GetStockedBooksUseCase(bookMemoryRepository);
+
+		const booksOrError = await getStock.execute(undefined as unknown as string);
+
+		deepEqual(booksOrError, new BookError("INVALID_TITLE"));
+	});
+
 	test("should return BOOK_NOT_FOUND error", async () => {
 		const bookMemoryRepository = new BookMemoryRepository();
 		const getStock = new GetStockedBooksUseCase(bookMemoryRepository);

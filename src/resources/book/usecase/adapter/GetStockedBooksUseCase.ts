@@ -1,12 +1,14 @@
 import { Book } from "../../domain/Book";
 import { BookRepositoryPort } from "../../persistence/port/BookRepositoryPort";
 import { BookError } from "../../BookResult";
-import { GetStockedBooksPort } from "../port/GetStockBooksPort";
+import { GetStockedBooksPort } from "../port/GetStockedBooksPort";
 
 export class GetStockedBooksUseCase implements GetStockedBooksPort {
 	constructor(private readonly bookRepository: BookRepositoryPort) {}
 
 	execute = async (title: string): Promise<Book[] | BookError> => {
+		if (!title) return new BookError("INVALID_TITLE");
+
 		const bookEntities = await this.bookRepository.search(title);
 
 		if (bookEntities.length === 0) return new BookError("BOOK_NOT_FOUND");

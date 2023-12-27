@@ -18,7 +18,8 @@ export class StockBookUseCase implements StockBookPort {
 	execute = async (stockBookDTO: StockBookDTO): Promise<Book | BookError> => {
 		const schemaValidation = StockBookDTOSchema.safeParse(stockBookDTO);
 
-		if (!schemaValidation.success) return new BookError("INVALID_DTO");
+		if (!schemaValidation.success)
+			return new BookError("INVALID_DTO", schemaValidation.error.issues);
 
 		const duplicatedBook = await this.bookRepository.getByTitleAndEdition(
 			schemaValidation.data.title,

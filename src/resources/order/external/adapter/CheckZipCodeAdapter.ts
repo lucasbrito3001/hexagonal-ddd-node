@@ -20,16 +20,6 @@ export class CheckZipCodeAdapter implements CheckZipCodePort {
 				`https://opencep.com/v1/${zipCode}`
 			);
 
-			console.log(
-				new ZipCodeInfos(
-					data.cep,
-					data.logradouro,
-					data.bairro,
-					data.localidade,
-					data.uf
-				)
-			);
-
 			return new ZipCodeInfos(
 				data.cep,
 				data.logradouro,

@@ -8,6 +8,7 @@ import { INPUT_BOOK } from "./contants";
 import { StockBookDTO } from "../controller/dto/StockBookDto";
 import { BookError } from "../BookResult";
 import { BookLocalFileStorage } from "../persistence/adapter/BookLocalFileStorage";
+import { ZodError } from "zod";
 
 describe("StockBookUseCase", () => {
 	let stockBookUseCase: StockBookUseCase;
@@ -44,7 +45,18 @@ describe("StockBookUseCase", () => {
 			INVALID_BOOK_DTO as StockBookDTO
 		);
 
-		deepEqual(bookOrError, new BookError("INVALID_DTO"));
+		deepEqual(
+			bookOrError,
+			new BookError("INVALID_DTO", [
+				{
+					code: "invalid_type",
+					expected: "string",
+					message: "Required",
+					path: ["title"],
+					received: "undefined",
+				},
+			])
+		);
 	});
 
 	test("should return DUPLICATED_BOOK error", async () => {
