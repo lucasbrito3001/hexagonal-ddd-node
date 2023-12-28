@@ -18,11 +18,10 @@ export class BookController {
 
 			if (bookOrError instanceof BookError) {
 				const { httpCode, ...errorMessage } = bookOrError;
-
 				return res.status(httpCode).json(errorMessage);
 			}
 
-			return res.status(200).json(bookOrError);
+			return res.status(201).json(bookOrError);
 		} catch (error) {
 			console.log(error);
 

@@ -1,5 +1,5 @@
 import { BookEntity } from "@/resources/book/persistence/book.entity";
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
 
 @Entity("order")
 export class OrderEntity {
@@ -33,4 +33,7 @@ export class OrderEntity {
 	@ManyToMany(() => BookEntity)
 	@JoinTable()
 	books?: BookEntity[];
+
+	@CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP(6)" })
+	public createdAt?: Date;
 }
