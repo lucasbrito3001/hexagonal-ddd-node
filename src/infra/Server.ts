@@ -1,15 +1,18 @@
 import express, { Express } from "express";
 import { DataSourceConnection } from "./DataSource";
 import { Server } from "http";
-import multer, { Multer } from "multer";
 import { CONFIG_ROUTERS } from "./router";
-import { Book } from "@/domain/entities/Book";
 import { ErrorsData, ErrorBase } from "@/error/ErrorBase";
 import { DependencyRegistry } from "./DependencyRegistry";
-import { OrderRepositoryDatabase } from "./repository/OrderDatabaseRepository";
+import { OrderRepositoryDatabase } from "./repository/OrderRepositoryDatabase";
 import { OrderEntity } from "./repository/entity/OrderEntity";
-import { BookRepositoryDatabase } from "./repository/BookDatabaseRepository";
 import { RegisterOrder } from "@/application/usecase/RegisterOrder";
+import { RabbitMQAdapter } from "./queue/RabbitMQAdapter";
+import { ItemEntity } from "./repository/entity/ItemEntity";
+import { ItemRepositoryDatabase } from "./repository/ItemRepositoryDatabase";
+import { QueueController } from "./queue/QueueController";
+import { RegisterItemCopy } from "@/application/usecase/RegisterItemCopy";
+import { GeneralLogger } from "./log/GeneralLogger";
 
 type WebServerErrorNames = "WEB_SERVER_CLOSED";
 
@@ -42,39 +45,55 @@ export class WebServer {
 
 		app.use(express.json());
 
-		const registry = this.fillRegistry();
+		const registry = await this.fillRegistry();
 		this.setRoutes(app, registry);
 
 		this.application = app.listen(process.env.PORT, () => {
-			console.log("Server started, listening on port " + process.env.PORT);
+			console.log("Server started, listening on port: " + process.env.PORT);
 		});
 	};
 
-	private fillRegistry() {
+	private async fillRegistry() {
 		const registry = new DependencyRegistry();
+		const queue = new RabbitMQAdapter();
+		await queue.connect();
 
 		const dependencies = [
-			{
+			() => ({
 				name: "orderRepository",
 				value: new OrderRepositoryDatabase(
 					this.dataSourceConnection.getRepository(OrderEntity)
 				),
-			},
-			{
-				name: "bookRepository",
-				value: new BookRepositoryDatabase(
-					this.dataSourceConnection.getRepository(OrderEntity)
+			}),
+			() => ({
+				name: "itemRepository",
+				value: new ItemRepositoryDatabase(
+					this.dataSourceConnection.getRepository(ItemEntity)
 				),
-			},
-			{
+			}),
+			() => ({
+				name: "queue",
+				value: queue,
+			}),
+			() => ({
+				name: "logger",
+				value: new GeneralLogger(),
+			}),
+			() => ({
 				name: "registerOrder",
 				value: new RegisterOrder(registry),
-			},
+			}),
+			() => ({
+				name: "registerItemCopy",
+				value: new RegisterItemCopy(registry),
+			}),
 		];
 
 		dependencies.forEach((dependency) =>
-			registry.push(dependency.name, dependency.value)
+			registry.push(dependency().name, dependency().value)
 		);
+
+		new QueueController(registry);
 
 		return registry;
 	}

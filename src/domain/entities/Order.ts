@@ -1,43 +1,51 @@
-import { ZodError } from "zod";
 import { randomUUID } from "node:crypto";
+import { RegisterOrderDTO } from "@/application/controller/dto/RegisterOrderDto";
 import {
-	RegisterOrderDTO,
-	RegisterOrderDTOSchema,
-} from "@/application/controller/dto/RegisterOrderDto";
+	OrderPaymentMethods,
+	OrderStatus,
+} from "@/infra/repository/entity/OrderEntity";
+import { OrderItems } from "../event/OrderRegistered";
+import { OrderItem } from "./OrderItem";
 
 export class Order {
-	private constructor(
+	constructor(
 		public id: string,
-		public country: string,
-		public state: string,
-		public city: string,
-		public district: string,
-		public street: string,
-		public number: number,
-		public complement: string,
-		public zipCode: string,
-		public books: string[],
-		public createdAt: Date
+		public user: string,
+		public items: OrderItem[],
+		public status: OrderStatus,
+		public paymentMethod: OrderPaymentMethods,
+		public totalCost: number,
+		public createdAt: string
 	) {}
 
 	static register = (
 		registerOrderDTO: RegisterOrderDTO,
+		user: string,
 		idGenerator: () => `${string}-${string}-${string}-${string}-${string}` = randomUUID
 	): Order => {
 		const id = idGenerator();
-		const createdAt = new Date();
+		const createdAt = new Date().toISOString();
+
+		const totalCost = registerOrderDTO.items.reduce((acc, item) => {
+			return (acc += (item.unitPrice || 0) * item.quantity);
+		}, 0);
+
+		const orderItems = registerOrderDTO.items.map((item) => {
+			return OrderItem.register(
+				id,
+				item.itemId,
+				item.quantity,
+				+(item.unitPrice || 0)
+			);
+		});
 
 		const order = new Order(
 			id,
-			registerOrderDTO.country,
-			registerOrderDTO.state,
-			registerOrderDTO.district,
-			registerOrderDTO.city,
-			registerOrderDTO.street,
-			registerOrderDTO.number,
-			registerOrderDTO.complement,
-			registerOrderDTO.zipCode,
-			registerOrderDTO.books,
+			user,
+			orderItems,
+			OrderStatus.Pending,
+			registerOrderDTO.paymentMethod,
+			totalCost,
 			createdAt
 		);
 

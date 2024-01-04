@@ -1,8 +1,8 @@
-export type OrderBook = {
-	id: string;
+export type OrderItems = {
+	itemId: string;
 	quantity: number;
 }[];
 
 export class OrderRegistered {
-	constructor(readonly orderId: string, readonly books: OrderBook) {}
+	constructor(readonly id: string, readonly items: OrderItems) {}
 }

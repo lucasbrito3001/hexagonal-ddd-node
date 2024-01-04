@@ -7,7 +7,7 @@ export class OrderMemoryRepository implements OrderRepository {
 	private orders: OrderEntity[] = [];
 
 	async save(registerOrderDTO: RegisterOrderDTO): Promise<void> {
-		const order = Order.register(registerOrderDTO);
+		const order = Order.register(registerOrderDTO, "");
 		this.orders.push(order as unknown as OrderEntity);
 	}
 

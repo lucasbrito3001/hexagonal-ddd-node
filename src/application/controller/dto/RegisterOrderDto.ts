@@ -1,15 +1,15 @@
+import { OrderPaymentMethods } from "@/infra/repository/entity/OrderEntity";
 import { z } from "zod";
 
 export const RegisterOrderDTOSchema = z.object({
-	country: z.string(),
-	state: z.string(),
-	district: z.string(),
-	city: z.string(),
-	street: z.string(),
-	number: z.number(),
-	complement: z.string(),
-	zipCode: z.string().length(8),
-	books: z.array(z.string()),
+	items: z.array(
+		z.object({
+			itemId: z.string(),
+			quantity: z.number().min(1),
+			unitPrice: z.number().optional(),
+		})
+	),
+	paymentMethod: z.nativeEnum(OrderPaymentMethods),
 });
 
 export type RegisterOrderDTO = z.infer<typeof RegisterOrderDTOSchema>;

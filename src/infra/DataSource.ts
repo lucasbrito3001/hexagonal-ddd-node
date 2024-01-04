@@ -6,7 +6,9 @@ import {
 	ObjectLiteral,
 } from "typeorm";
 import { OrderEntity } from "./repository/entity/OrderEntity";
-import { BookEntity } from "./repository/entity/BookEntity";
+import { OrderItemEntity } from "./repository/entity/OrderItemEntity";
+import { UserEntity } from "./repository/entity/UserEntity";
+import { ItemEntity } from "./repository/entity/ItemEntity";
 
 type DataSourceErrorNames =
 	| "BAD_DATASOURCE_CONFIG"
@@ -44,9 +46,9 @@ export class DataSourceConnection {
 			username: process.env.DS_USER || "",
 			password: process.env.DS_PASS || "",
 			database: process.env.DS_DATABASE || "",
-			entities: [BookEntity, OrderEntity],
+			entities: [OrderEntity, OrderItemEntity, UserEntity, ItemEntity],
 			synchronize: process.env.NODE_ENV !== "prd",
-			logging: process.env.NODE_ENV !== "prd",
+			// logging: process.env.NODE_ENV !== "prd",
 		};
 
 		if (Object.values(options).some((opt) => !opt)) return undefined;

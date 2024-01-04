@@ -1,4 +1,7 @@
-import { RegisterOrderDTO } from "./dto/RegisterOrderDto";
+import {
+	RegisterOrderDTO,
+	RegisterOrderDTOSchema,
+} from "./dto/RegisterOrderDto";
 import { OrderError } from "../../error/OrderError";
 import { Request, Response } from "express";
 import { RegisterOrderPort } from "@/application/usecase/interfaces/RegisterOrderPort";
@@ -18,14 +21,22 @@ export class OrderController {
 	create = async (req: Request, res: Response): Promise<any> => {
 		try {
 			const registerOrderDTO: RegisterOrderDTO = req.body;
-			const orderOrError = await this.registerOrder.execute(registerOrderDTO);
+			const userId: string = "d711bbed-81d4-4a26-8109-56980748d927";
 
-			if (orderOrError instanceof OrderError) {
-				const { httpCode, ...errorMessage } = orderOrError;
-				return res.status(httpCode).json(errorMessage);
+			const schemaValidation =
+				RegisterOrderDTOSchema.safeParse(registerOrderDTO);
+
+			if (!schemaValidation.success) {
+				const { httpCode, ...orderError } = new OrderError(
+					"INVALID_DTO",
+					schemaValidation.error.issues
+				);
+				return res.status(httpCode).json(orderError);
 			}
 
-			return res.status(201).json(orderOrError);
+			const order = await this.registerOrder.execute(registerOrderDTO, userId);
+
+			return res.status(201).json(order);
 		} catch (error) {
 			console.log(error);
 

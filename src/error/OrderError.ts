@@ -37,11 +37,12 @@ export const ORDER_ERRORS: ErrorsData<OrderErrorNames> = {
 };
 
 export class OrderError extends ErrorBase<OrderErrorNames> {
-	constructor(errorName: OrderErrorNames) {
+	constructor(errorName: OrderErrorNames, cause?: any) {
 		super(
 			errorName,
 			ORDER_ERRORS[errorName].message,
-			ORDER_ERRORS[errorName].httpCode
+			ORDER_ERRORS[errorName].httpCode,
+			cause
 		);
 	}
 }

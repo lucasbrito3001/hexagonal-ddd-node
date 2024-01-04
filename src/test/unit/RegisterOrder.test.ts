@@ -1,37 +1,44 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { RegisterOrder } from "@/application/usecase/RegisterOrder";
 import { OrderMemoryRepository } from "../../infra/repository/mock/OrderMemoryRepository";
-import { INPUT_BOOK, INPUT_ORDER } from "../constants";
-import { Order } from "../../domain/entities/Order";
-import { OrderError } from "../../error/OrderError";
-import { StockBook } from "@/application/usecase/StockBook";
-import { BookLocalFileStorage } from "@/infra/repository/mock/BookLocalFileStorage";
-import { BookMemoryRepository } from "@/infra/repository/mock/BookMemoryRepository";
-import { Queue } from "@/infra/queue/Queue";
+import { INPUT_ORDER } from "../constants";
 import { MockQueue } from "@/infra/queue/mock/MockQueue";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
+import { Queue } from "@/infra/queue/Queue";
+import { OrderRegistered } from "@/domain/event/OrderRegistered";
 
 describe("RegisterOrder", () => {
 	let registerOrder: RegisterOrder;
-	let bookMemoryRepository: BookMemoryRepository;
+	let mockQueue: Queue;
+	const mockGetResult = [{ id: "0-0-0-0-0", unitPrice: 100 }];
 
 	beforeEach(() => {
 		const registry = new DependencyRegistry();
-
-		bookMemoryRepository = new BookMemoryRepository();
+		mockQueue = new MockQueue();
 
 		registry.push("orderRepository", new OrderMemoryRepository());
-		registry.push("bookRepository", bookMemoryRepository);
-		registry.push("bookFileStorage", new BookLocalFileStorage());
-		registry.push("queue", new MockQueue());
+		registry.push("itemRepository", {
+			get: () => mockGetResult,
+		});
+		registry.push("queue", mockQueue);
 
 		registerOrder = new RegisterOrder(registry);
 	});
 
 	test("should register a new order successfully", async () => {
-		await bookMemoryRepository.save(INPUT_BOOK);
-		const order = await registerOrder.execute(INPUT_ORDER);
+		const spyQueuePublish = vi.spyOn(mockQueue, "publish");
+
+		const order = await registerOrder.execute(INPUT_ORDER, "0-0-0-0-0");
 
 		expect(order.orderId).toBeDefined();
+		expect(spyQueuePublish).toHaveBeenCalledWith(
+			"orderRegistered",
+			new OrderRegistered(order.orderId, [
+				{
+					...INPUT_ORDER.items[0],
+					itemId: mockGetResult[0].id,
+				},
+			])
+		);
 	});
 });
