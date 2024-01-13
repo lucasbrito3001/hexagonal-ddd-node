@@ -4,6 +4,8 @@ import { UserEntity } from "./UserEntity";
 
 export enum OrderStatus {
 	Pending = "PENDING",
+	ItemsApproved = "ITEMS_APPROVED",
+	ItemsRejected = "ITEMS_REJECTED",
 	Processing = "PROCESSING",
 	Shipped = "SHIPPED",
 	Delivered = "DELIVERED",

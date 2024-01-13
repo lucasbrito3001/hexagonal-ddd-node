@@ -1,5 +1,5 @@
 import { BookStocked } from "@/domain/event/BookStocked";
-import { RegisterItemCopyPort } from "./interfaces/RegisterItemCopydPort";
+import { RegisterItemCopyPort } from "./interfaces/RegisterItemCopyPort";
 import { ItemRepository } from "../repository/ItemRepository";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { Item } from "@/domain/entities/Item";

@@ -9,6 +9,8 @@ import { OrderEntity } from "./repository/entity/OrderEntity";
 import { OrderItemEntity } from "./repository/entity/OrderItemEntity";
 import { UserEntity } from "./repository/entity/UserEntity";
 import { ItemEntity } from "./repository/entity/ItemEntity";
+import { GeneralLogger } from "./log/GeneralLogger";
+import { Logger } from "./log/Logger";
 
 type DataSourceErrorNames =
 	| "BAD_DATASOURCE_CONFIG"
@@ -37,6 +39,7 @@ export class DataSourceError extends ErrorBase<DataSourceErrorNames> {
 
 export class DataSourceConnection {
 	private connection: DataSource | undefined;
+	private readonly logger: Logger = new GeneralLogger();
 
 	getConfig(): DataSourceOptions | undefined {
 		const options: DataSourceOptions = {
@@ -57,12 +60,19 @@ export class DataSourceConnection {
 	}
 
 	async initialize(): Promise<void> {
-		const config = this.getConfig();
+		try {
+			this.logger.log("[DATASOURCE] - Connecting to database...");
+			const config = this.getConfig();
 
-		if (config === undefined)
-			throw new DataSourceError("BAD_DATASOURCE_CONFIG");
+			if (config === undefined)
+				throw new DataSourceError("BAD_DATASOURCE_CONFIG");
 
-		this.connection = await new DataSource(config).initialize();
+			this.connection = await new DataSource(config).initialize();
+			this.logger.log("[DATASOURCE] - Connected succesfully!");
+		} catch (error) {
+			const anyError = error as any;
+			throw new Error(anyError.message);
+		}
 	}
 
 	getRepository(entity: EntityTarget<ObjectLiteral>) {
@@ -73,8 +83,7 @@ export class DataSourceConnection {
 	}
 
 	async close(): Promise<void> {
-		if (this.connection === undefined)
-			throw new DataSourceError("DATASOURCE_CONNECTION_CLOSED");
+		if (this.connection === undefined) return;
 
 		await this.connection?.destroy();
 	}

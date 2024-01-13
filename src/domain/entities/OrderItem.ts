@@ -1,7 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { RegisterOrderDTO } from "@/application/controller/dto/RegisterOrderDto";
-import { OrderStatus } from "@/infra/repository/entity/OrderEntity";
-import { OrderItems } from "../event/OrderRegistered";
 
 export class OrderItem {
 	private constructor(

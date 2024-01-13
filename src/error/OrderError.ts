@@ -46,3 +46,15 @@ export class OrderError extends ErrorBase<OrderErrorNames> {
 		);
 	}
 }
+
+export class InvalidOrderInputError extends ErrorBase<"INVALID_INPUT"> {
+	constructor(cause: any) {
+		super("INVALID_INPUT", "The input is invalid.", 400, cause);
+	}
+}
+
+export class OrderNotFoundError extends ErrorBase<"ORDER_NOT_FOUND"> {
+	constructor() {
+		super("ORDER_NOT_FOUND", "No order was found with this id.", 400);
+	}
+}

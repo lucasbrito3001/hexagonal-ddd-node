@@ -4,7 +4,6 @@ import {
 	OrderPaymentMethods,
 	OrderStatus,
 } from "@/infra/repository/entity/OrderEntity";
-import { OrderItems } from "../event/OrderRegistered";
 import { OrderItem } from "./OrderItem";
 
 export class Order {
@@ -50,5 +49,31 @@ export class Order {
 		);
 
 		return order;
+	};
+
+	static approveOrderItems = (order: Order) => {
+		const status = OrderStatus.ItemsApproved;
+		return new Order(
+			order.id,
+			order.user,
+			order.items,
+			status,
+			order.paymentMethod,
+			order.totalCost,
+			order.createdAt
+		);
+	};
+
+	static rejectOrderItems = (order: Order) => {
+		const status = OrderStatus.ItemsRejected;
+		return new Order(
+			order.id,
+			order.user,
+			order.items,
+			status,
+			order.paymentMethod,
+			order.totalCost,
+			order.createdAt
+		);
 	};
 }
