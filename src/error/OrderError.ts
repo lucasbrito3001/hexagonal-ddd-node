@@ -1,60 +1,51 @@
-import { ErrorBase, ErrorsData } from "./ErrorBase";
+import { ErrorBase } from "./ErrorBase";
 
-type OrderErrorNames =
-	| "BOOK_NOT_FOUND"
-	| "BOOK_UNAVAILABLE"
-	| "INVALID_DTO"
-	| "INVALID_DATE_RANGE"
-	| "REQUIRED_DATE_RANGE"
-	| "ORDER_NOT_FOUND";
-
-export const ORDER_ERRORS: ErrorsData<OrderErrorNames> = {
-	INVALID_DTO: {
-		message: "The sent informations are invalid, please check and try again",
-		httpCode: 400,
-	},
-	BOOK_UNAVAILABLE: {
-		message: "Some of the books are unavailable",
-		httpCode: 400,
-	},
-	BOOK_NOT_FOUND: {
-		message: "Some of the books were not found in the database",
-		httpCode: 400,
-	},
-	ORDER_NOT_FOUND: {
-		message: "Was not found any orders in this date range",
-		httpCode: 404,
-	},
-	INVALID_DATE_RANGE: {
-		message:
-			"The date range are not valid, the start date must be before the end date",
-		httpCode: 400,
-	},
-	REQUIRED_DATE_RANGE: {
-		message: "The date range is required",
-		httpCode: 400,
-	},
-};
-
-export class OrderError extends ErrorBase<OrderErrorNames> {
-	constructor(errorName: OrderErrorNames, cause?: any) {
-		super(
-			errorName,
-			ORDER_ERRORS[errorName].message,
-			ORDER_ERRORS[errorName].httpCode,
-			cause
-		);
-	}
-}
-
-export class InvalidOrderInputError extends ErrorBase<"INVALID_INPUT"> {
+export class InvalidOrderInputError extends ErrorBase {
 	constructor(cause: any) {
 		super("INVALID_INPUT", "The input is invalid.", 400, cause);
 	}
 }
 
-export class OrderNotFoundError extends ErrorBase<"ORDER_NOT_FOUND"> {
+export class OrderNotFoundError extends ErrorBase {
 	constructor() {
 		super("ORDER_NOT_FOUND", "No order was found with this id.", 400);
+	}
+}
+
+export class OrderNotFoundBetweenDateRangeError extends ErrorBase {
+	constructor() {
+		super("ORDER_NOT_FOUND_BETWEEN_DATE_RANGE", "No order was found in this date range.", 400);
+	}
+}
+
+export class OrderItemNotFoundError extends ErrorBase {
+	constructor() {
+		super(
+			"ORDER_ITEM_NOT_FOUND",
+			"Some of the order items were not found in the database",
+			400
+		);
+	}
+}
+
+export class OrderItemUnavailableError extends ErrorBase {
+	constructor() {
+		super("BOOK_UNAVAILABLE", "Some of the order items are unavailable", 400);
+	}
+}
+
+export class InvalidDateRangeError extends ErrorBase {
+	constructor() {
+		super(
+			"INVALID_DATE_RANGE",
+			"The date range are not valid, the start date must be before the end date",
+			400
+		);
+	}
+}
+
+export class RequiredDateRangeError extends ErrorBase {
+	constructor() {
+		super("REQUIRED_DATE_RANGE", "The date range is required", 400);
 	}
 }

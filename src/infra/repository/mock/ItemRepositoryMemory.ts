@@ -1,8 +1,8 @@
 import { Order } from "@/domain/entities/Order";
-import { OrderEntity } from "../entity/OrderEntity";
+import { OrderEntity } from "../entity/Order.entity";
 import { RegisterOrderDTO } from "@/application/controller/dto/RegisterOrderDto";
 import { ItemRepository } from "@/application/repository/ItemRepository";
-import { ItemEntity } from "../entity/ItemEntity";
+import { ItemEntity } from "../entity/Item.entity";
 import { Item } from "@/domain/entities/Item";
 
 export class ItemRepositoryMemory implements ItemRepository {

@@ -4,10 +4,10 @@ import { Server } from "http";
 import { CONFIG_ROUTERS } from "./router";
 import { DependencyRegistry } from "./DependencyRegistry";
 import { OrderRepositoryDatabase } from "./repository/OrderRepositoryDatabase";
-import { OrderEntity } from "./repository/entity/OrderEntity";
+import { OrderEntity } from "./repository/entity/Order.entity";
 import { RegisterOrder } from "@/application/usecase/RegisterOrder";
 import { RabbitMQAdapter } from "./queue/RabbitMQAdapter";
-import { ItemEntity } from "./repository/entity/ItemEntity";
+import { ItemEntity } from "./repository/entity/Item.entity";
 import { ItemRepositoryDatabase } from "./repository/ItemRepositoryDatabase";
 import { QueueController } from "./queue/QueueController";
 import { RegisterItemCopy } from "@/application/usecase/RegisterItemCopy";
@@ -22,6 +22,7 @@ import { Queue } from "./queue/Queue";
 import cors from "cors";
 import { RejectOrderItemsSub } from "./queue/subscriber/RejectOrderItemsSub";
 import { RejectOrderItems } from "@/application/usecase/RejectOrderItems";
+import { ListOrders } from "@/application/usecase/ListOrders";
 
 export class WebServer {
 	private server: Server | undefined;
@@ -33,10 +34,14 @@ export class WebServer {
 		this.app.use(express.json());
 		this.app.use(cors());
 
-		await this.dataSourceConnection.initialize();
-
 		const logger = new GeneralLogger();
 		const queue = await this.connectToQueue(logger);
+
+		try {
+			await this.dataSourceConnection.initialize();
+		} catch (error) {
+			logger.error(error);
+		}
 
 		const registry = await this.fillRegistry(logger, queue);
 
@@ -81,6 +86,7 @@ export class WebServer {
 			.push("queue", queue)
 			.push("logger", logger)
 			.push("registerOrder", new RegisterOrder(registry))
+			.push("listOrders", new ListOrders(registry))
 			.push("registerItemCopy", new RegisterItemCopy(registry))
 			.push("approveOrderItems", new ApproveOrderItems(registry))
 			.push("rejectOrderItems", new RejectOrderItems(registry));

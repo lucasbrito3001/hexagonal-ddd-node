@@ -1,4 +1,4 @@
-import { OrderPaymentMethods } from "@/infra/repository/entity/OrderEntity";
+import { OrderPaymentMethods } from "@/infra/repository/entity/Order.entity";
 import { z } from "zod";
 
 export const RegisterOrderDTOSchema = z.object({

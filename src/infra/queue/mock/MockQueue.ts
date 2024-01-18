@@ -1,4 +1,5 @@
 import { Queue } from "../Queue";
+import { QueueSubscriber } from "../subscriber/QueueSubscriber";
 
 export class MockQueue implements Queue {
 	queue: any[] = [];
@@ -7,7 +8,7 @@ export class MockQueue implements Queue {
 		console.log("connected");
 	}
 
-	async subscribe(queueName: string, callback: Function): Promise<void> {
+	async subscribe(_: QueueSubscriber): Promise<void> {
 		this.queue.shift();
 	}
 

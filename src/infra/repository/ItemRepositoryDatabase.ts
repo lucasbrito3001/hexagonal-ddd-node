@@ -1,7 +1,7 @@
 import { In, Repository } from "typeorm";
 import { ItemRepository } from "@/application/repository/ItemRepository";
 import { Item } from "@/domain/entities/Item";
-import { ItemEntity } from "./entity/ItemEntity";
+import { ItemEntity } from "./entity/Item.entity";
 
 export class ItemRepositoryDatabase implements ItemRepository {
 	constructor(private readonly itemRepository: Repository<ItemEntity>) {}

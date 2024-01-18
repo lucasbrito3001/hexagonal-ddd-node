@@ -1,36 +1,40 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { ListOrders } from "@/application/usecase/ListOrders";
 import { OrderMemoryRepository } from "../../infra/repository/mock/OrderMemoryRepository";
-import { OrderError } from "../../error/OrderError";
 import { INPUT_ORDER } from "../constants";
 import { Order } from "../../domain/entities/Order";
+import { DependencyRegistry } from "@/infra/DependencyRegistry";
+import { InvalidDateRangeError, OrderNotFoundError } from "@/error/OrderError";
 
-describe("ListOrders", () => {
+describe("[Use Case - ListOrders]", () => {
+	const registry = new DependencyRegistry();
 	let listOrders: ListOrders;
 	let orderMemoryRepository: OrderMemoryRepository;
 
 	beforeEach(() => {
 		orderMemoryRepository = new OrderMemoryRepository();
 
-		listOrders = new ListOrders(orderMemoryRepository);
+		registry.push("orderRepository", orderMemoryRepository);
+
+		listOrders = new ListOrders(registry);
 	});
 
-	test("should return OrderError with INVALID_DATE_RANGE name", async () => {
+	test("should return InvalidDateRangeError when startDate > endDate", async () => {
 		const startDate = new Date("2023-01-02");
 		const endDate = new Date("2023-01-01");
 
-		const ordersOrError = await listOrders.execute(startDate, endDate);
+		const fn = () => listOrders.execute(startDate, endDate);
 
-		expect(ordersOrError).toStrictEqual(new OrderError("INVALID_DATE_RANGE"));
+		expect(fn).rejects.toBeInstanceOf(InvalidDateRangeError);
 	});
 
-	test("should return OrderError with ORDER_NOT_FOUND name", async () => {
+	test("should return OrderNotFoundError when don't have orders in the range", async () => {
 		const startDate = new Date("2023-01-02");
 		const endDate = new Date("2023-01-03");
 
-		const ordersOrError = await listOrders.execute(startDate, endDate);
+		const fn = () => listOrders.execute(startDate, endDate);
 
-		expect(ordersOrError).toStrictEqual(new OrderError("ORDER_NOT_FOUND"));
+		expect(fn).rejects.toBeInstanceOf(OrderNotFoundError);
 	});
 
 	test("should list orders successfully", async () => {
@@ -42,7 +46,8 @@ describe("ListOrders", () => {
 		const endDate = new Date(currentDate);
 		endDate.setDate(endDate.getDate() + 1);
 
-		await orderMemoryRepository.save(INPUT_ORDER);
+		const order = Order.register(INPUT_ORDER, "0", () => "0-0-0-0-0");
+		await orderMemoryRepository.save(order);
 
 		const orders = (await listOrders.execute(startDate, endDate)) as Order[];
 

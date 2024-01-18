@@ -3,11 +3,11 @@ import { RegisterOrderDTO } from "@/application/controller/dto/RegisterOrderDto"
 import {
 	OrderPaymentMethods,
 	OrderStatus,
-} from "@/infra/repository/entity/OrderEntity";
+} from "@/infra/repository/entity/Order.entity";
 import { OrderItem } from "./OrderItem";
 
 export class Order {
-	constructor(
+	private constructor(
 		public id: string,
 		public user: string,
 		public items: OrderItem[],
@@ -51,6 +51,26 @@ export class Order {
 		return order;
 	};
 
+	static instance = (
+		id: string,
+		user: string,
+		items: OrderItem[],
+		status: OrderStatus,
+		paymentMethod: OrderPaymentMethods,
+		totalCost: number,
+		createdAt: string
+	) => {
+		return new Order(
+			id,
+			user,
+			items || [],
+			status,
+			paymentMethod,
+			totalCost,
+			createdAt
+		);
+	};
+
 	static approveOrderItems = (order: Order) => {
 		const status = OrderStatus.ItemsApproved;
 		return new Order(
@@ -66,6 +86,19 @@ export class Order {
 
 	static rejectOrderItems = (order: Order) => {
 		const status = OrderStatus.ItemsRejected;
+		return new Order(
+			order.id,
+			order.user,
+			order.items,
+			status,
+			order.paymentMethod,
+			order.totalCost,
+			order.createdAt
+		);
+	};
+
+	static approvePayment = (order: Order) => {
+		const status = OrderStatus.PaymentApproved;
 		return new Order(
 			order.id,
 			order.user,

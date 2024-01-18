@@ -1,6 +1,6 @@
 import "reflect-metadata";
-
 import "module-alias/register";
+
 import { config } from "dotenv";
 import { DataSourceConnection } from "./infra/DataSource";
 import { WebServer } from "./infra/Server";

@@ -5,7 +5,7 @@ import {
 	OrderEntity,
 	OrderPaymentMethods,
 	OrderStatus,
-} from "./entity/OrderEntity";
+} from "./entity/Order.entity";
 import { Order } from "@/domain/entities/Order";
 import { OrderItem } from "@/domain/entities/OrderItem";
 
@@ -21,7 +21,9 @@ export class OrderRepositoryDatabase implements OrderRepository {
 			where: { id },
 		});
 
-		const order = new Order(
+		if (orderEntity === null) return null;
+
+		const order = Order.instance(
 			orderEntity?.id as string,
 			orderEntity?.user as string,
 			orderEntity?.items as OrderItem[],
@@ -35,6 +37,9 @@ export class OrderRepositoryDatabase implements OrderRepository {
 	}
 
 	async list(startDate: Date, endDate: Date): Promise<OrderEntity[]> {
+		startDate.setHours(0, 0, 0);
+		endDate.setHours(23, 59, 59);
+
 		return await this.orderRepository.find({
 			where: {
 				createdAt: Between(startDate, endDate),

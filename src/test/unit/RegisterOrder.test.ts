@@ -7,7 +7,7 @@ import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { Queue } from "@/infra/queue/Queue";
 import { OrderRegistered } from "@/domain/event/OrderRegistered";
 
-describe("RegisterOrder", () => {
+describe("[Use Case - RegisterOrder]", () => {
 	let registerOrder: RegisterOrder;
 	let mockQueue: Queue;
 	const mockGetResult = [{ id: "0-0-0-0-0", unitPrice: 100 }];
@@ -35,7 +35,7 @@ describe("RegisterOrder", () => {
 			"orderRegistered",
 			new OrderRegistered(order.orderId, [
 				{
-					...INPUT_ORDER.items[0],
+					quantity: INPUT_ORDER.items[0].quantity,
 					itemId: mockGetResult[0].id,
 				},
 			])

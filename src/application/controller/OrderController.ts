@@ -2,7 +2,10 @@ import {
 	RegisterOrderDTO,
 	RegisterOrderDTOSchema,
 } from "./dto/RegisterOrderDto";
-import { InvalidOrderInputError, OrderError } from "../../error/OrderError";
+import {
+	InvalidOrderInputError,
+	RequiredDateRangeError,
+} from "../../error/OrderError";
 import { NextFunction, Request, Response } from "express";
 import { RegisterOrderPort } from "@/application/usecase/interfaces/RegisterOrderPort";
 import { ListOrdersPort } from "@/application/usecase/interfaces/ListOrdersPort";
@@ -21,7 +24,7 @@ export class OrderController {
 		this.logger = registry.inject("logger");
 	}
 
-	create = async (
+	register = async (
 		req: Request,
 		res: Response,
 		next: NextFunction
@@ -34,7 +37,7 @@ export class OrderController {
 				"RegisterOrder",
 				`Payment method: ${
 					registerOrderDTO.paymentMethod
-				} / items: ${registerOrderDTO.items.reduce(
+				} / items: ${registerOrderDTO.items?.reduce(
 					(acc, item) => (acc += `\n| ${item.itemId} - ${item.quantity}`),
 					""
 				)}`
@@ -54,31 +57,24 @@ export class OrderController {
 		}
 	};
 
-	list = async (req: Request, res: Response): Promise<any> => {
+	list = async (
+		req: Request,
+		res: Response,
+		next: NextFunction
+	): Promise<any> => {
 		try {
 			const { startDate, endDate } = req.query;
 
-			if (!startDate || !endDate) {
-				const { httpCode, ...error } = new OrderError("REQUIRED_DATE_RANGE");
-				res.status(httpCode).json(error);
-			}
+			if (!startDate || !endDate) throw new RequiredDateRangeError();
 
-			const ordersOrError = await this.listOrders.execute(
+			const orders = await this.listOrders.execute(
 				new Date(startDate as string),
 				new Date(endDate as string)
 			);
 
-			if (ordersOrError instanceof OrderError) {
-				const { httpCode, ...error } = ordersOrError;
-				return res.status(httpCode).json(error);
-			}
-
-			res.status(200).json(ordersOrError);
+			res.status(200).json(orders);
 		} catch (error) {
-			console.log(error);
-
-			const { httpCode, ...unexpectedErrorMessage } = new UnexpectedError();
-			return res.status(httpCode).json(unexpectedErrorMessage);
+			next(error);
 		}
 	};
 }

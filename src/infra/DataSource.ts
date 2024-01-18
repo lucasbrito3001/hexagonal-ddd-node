@@ -5,12 +5,13 @@ import {
 	EntityTarget,
 	ObjectLiteral,
 } from "typeorm";
-import { OrderEntity } from "./repository/entity/OrderEntity";
-import { OrderItemEntity } from "./repository/entity/OrderItemEntity";
-import { UserEntity } from "./repository/entity/UserEntity";
-import { ItemEntity } from "./repository/entity/ItemEntity";
+import { OrderEntity } from "./repository/entity/Order.entity";
+import { OrderItemEntity } from "./repository/entity/OrderItem.entity";
+import { UserEntity } from "./repository/entity/User.entity";
+import { ItemEntity } from "./repository/entity/Item.entity";
 import { GeneralLogger } from "./log/GeneralLogger";
 import { Logger } from "./log/Logger";
+import { join } from "path";
 
 type DataSourceErrorNames =
 	| "BAD_DATASOURCE_CONFIG"
@@ -27,7 +28,7 @@ export const DATASOURCE_ERRORS: ErrorsData<DataSourceErrorNames> = {
 	},
 };
 
-export class DataSourceError extends ErrorBase<DataSourceErrorNames> {
+export class DataSourceError extends ErrorBase {
 	constructor(errorName: DataSourceErrorNames) {
 		super(
 			errorName,
@@ -50,13 +51,21 @@ export class DataSourceConnection {
 			password: process.env.DS_PASS || "",
 			database: process.env.DS_DATABASE || "",
 			entities: [OrderEntity, OrderItemEntity, UserEntity, ItemEntity],
-			synchronize: process.env.NODE_ENV !== "prd",
+			// synchronize: process.env.NODE_ENV !== "prd",
 			// logging: process.env.NODE_ENV !== "prd",
+		};
+
+		const optionsTest: DataSourceOptions = {
+			type: "sqlite",
+			database: ":memory:",
+			dropSchema: true,
+			synchronize: true,
+			entities: [UserEntity, OrderEntity, ItemEntity, OrderItemEntity],
 		};
 
 		if (Object.values(options).some((opt) => !opt)) return undefined;
 
-		return options;
+		return process.env.NODE_ENV === "e2e" ? optionsTest : options;
 	}
 
 	async initialize(): Promise<void> {
