@@ -7,6 +7,7 @@ import {
 } from "../entity/Order.entity";
 import { RegisterOrderDTO } from "@/application/controller/dto/RegisterOrderDto";
 import { OrderItem } from "@/domain/entities/OrderItem";
+import { User } from "@/domain/entities/User";
 
 export class OrderMemoryRepository implements OrderRepository {
 	private orders: OrderEntity[] = [];
@@ -31,16 +32,28 @@ export class OrderMemoryRepository implements OrderRepository {
 		);
 	}
 
-	async list(initialDate: Date, endDate: Date): Promise<OrderEntity[]> {
+	async list(initialDate: Date, endDate: Date): Promise<Order[]> {
 		let initialDateMs = initialDate.setHours(0, 0, 0);
 		initialDateMs = initialDate.getTime();
 
 		let endDateMs = endDate.setHours(23, 59, 59);
 		endDateMs = endDate.getTime();
 
-		return this.orders.filter((order) => {
+		const orders = this.orders.filter((order) => {
 			const createdAtMs = new Date(order.createdAt as Date).getTime();
 			return createdAtMs >= initialDateMs && createdAtMs <= endDateMs;
 		});
+
+		return orders.map((order) =>
+			Order.instance(
+				order.id as string,
+				order.user as string,
+				order.items as OrderItem[],
+				order.status as OrderStatus,
+				order.paymentMethod as OrderPaymentMethods,
+				order.totalCost as number,
+				order.createdAt as string
+			)
+		);
 	}
 }

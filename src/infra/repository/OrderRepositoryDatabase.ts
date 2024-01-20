@@ -36,14 +36,31 @@ export class OrderRepositoryDatabase implements OrderRepository {
 		return order;
 	}
 
-	async list(startDate: Date, endDate: Date): Promise<OrderEntity[]> {
-		startDate.setHours(0, 0, 0);
-		endDate.setHours(23, 59, 59);
+	async list(startDate: Date, endDate: Date): Promise<Order[]> {
+		startDate.setHours(0, 0, 0, 0);
+		endDate.setHours(+23, 59, 59, 999);
 
-		return await this.orderRepository.find({
+		const orderEntities = await this.orderRepository.find({
 			where: {
-				createdAt: Between(startDate, endDate),
+				createdAt: Between(startDate.toISOString(), endDate.toISOString()),
+			},
+			relations: {
+				items: true,
 			},
 		});
+
+		const orders = orderEntities.map((orderEntity) =>
+			Order.instance(
+				orderEntity.id as string,
+				orderEntity.user as string,
+				orderEntity.items as OrderItem[],
+				orderEntity.status as OrderStatus,
+				orderEntity.paymentMethod as OrderPaymentMethods,
+				orderEntity.totalCost as number,
+				orderEntity.createdAt as string
+			)
+		);
+
+		return orders;
 	}
 }

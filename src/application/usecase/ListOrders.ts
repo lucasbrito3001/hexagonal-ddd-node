@@ -1,13 +1,11 @@
 import { ListOrdersPort } from "./interfaces/ListOrdersPort";
 import { Order } from "@/domain/entities/Order";
 import { OrderRepository } from "../repository/OrderRepository";
-import {
-	OrderPaymentMethods,
-	OrderStatus,
-} from "@/infra/repository/entity/Order.entity";
-import { OrderItem } from "@/domain/entities/OrderItem";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
-import { InvalidDateRangeError, OrderNotFoundBetweenDateRangeError, OrderNotFoundError } from "@/error/OrderError";
+import {
+	InvalidDateRangeError,
+	OrderNotFoundBetweenDateRangeError,
+} from "@/error/OrderError";
 
 export class ListOrders implements ListOrdersPort {
 	private readonly orderRepository: OrderRepository;
@@ -22,21 +20,9 @@ export class ListOrders implements ListOrdersPort {
 
 		if (startDateMs > endDateMs) throw new InvalidDateRangeError();
 
-		const orderEntities = await this.orderRepository.list(startDate, endDate);
+		const orders = await this.orderRepository.list(startDate, endDate);
 
-		if (orderEntities.length === 0) throw new OrderNotFoundBetweenDateRangeError();
-
-		const orders = orderEntities.map((orderEntity) =>
-			Order.instance(
-				orderEntity.id as string,
-				orderEntity.user as string,
-				orderEntity.items as OrderItem[],
-				orderEntity.status as OrderStatus,
-				orderEntity.paymentMethod as OrderPaymentMethods,
-				orderEntity.totalCost as number,
-				orderEntity.createdAt as string
-			)
-		);
+		if (orders.length === 0) throw new OrderNotFoundBetweenDateRangeError();
 
 		return orders;
 	}

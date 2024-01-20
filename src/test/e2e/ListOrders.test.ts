@@ -36,7 +36,8 @@ describe("/list_orders", () => {
 
 	test("should list orders successfully", async () => {
 		const orderRepo = dataSourceConnection.getRepository(OrderEntity);
-		await orderRepo.save(Order.register(INPUT_ORDER, INPUT_USER.id));
+		const order = Order.register(INPUT_ORDER, INPUT_USER.id);
+		await orderRepo.save(order);
 
 		const response = await request(app)
 			.get(`/list_orders?startDate=${today}&endDate=${today}`)
