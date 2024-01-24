@@ -23,27 +23,38 @@ import cors from "cors";
 import { RejectOrderItemsSub } from "./queue/subscriber/RejectOrderItemsSub";
 import { RejectOrderItems } from "@/application/usecase/RejectOrderItems";
 import { ListOrders } from "@/application/usecase/ListOrders";
+import {
+	DatabaseConnectionError,
+	QueueConnectionError,
+} from "@/error/InfraError";
 
 export class WebServer {
 	private server: Server | undefined;
 	private app: Express = express();
 
-	constructor(private dataSourceConnection: DataSourceConnection) {}
+	constructor(
+		private dataSourceConnection: DataSourceConnection,
+		private queue: Queue,
+		private logger: Logger
+	) {}
 
 	start = async (isTest: boolean) => {
 		this.app.use(express.json());
 		this.app.use(cors());
 
-		const logger = new GeneralLogger();
-		const queue = await this.connectToQueue(logger);
-
 		try {
 			await this.dataSourceConnection.initialize();
 		} catch (error) {
-			logger.error(error);
+			throw new DatabaseConnectionError(error as any);
 		}
 
-		const registry = await this.fillRegistry(logger, queue);
+		try {
+			await this.queue.connect();
+		} catch (error) {
+			throw new QueueConnectionError(error as any);
+		}
+
+		const registry = await this.fillRegistry();
 
 		this.setRoutes(registry);
 		this.setQueueControllerSubscribers(registry);
@@ -51,26 +62,20 @@ export class WebServer {
 		// Exception handler middleware
 		this.app.use(
 			(err: Error, req: Request, res: Response, next: NextFunction): void => {
-				return new UncaughtExceptionHandler(res, logger).handle(err);
+				return new UncaughtExceptionHandler(res, this.logger).handle(err);
 			}
 		);
 
 		if (isTest) return this.app;
 
 		this.server = this.app.listen(process.env.PORT, () => {
-			logger.log(
-				"\n[SERVER] Server started, listening on port: " + process.env.PORT
+			this.logger.log(
+				`\n[SERVER] Server started, listening on port: ${process.env.PORT}\n`
 			);
 		});
 	};
 
-	private async connectToQueue(logger: Logger): Promise<Queue> {
-		const queue = new RabbitMQAdapter(logger);
-		await queue.connect();
-		return queue;
-	}
-
-	private async fillRegistry(logger: Logger, queue: Queue) {
+	private async fillRegistry() {
 		const registry = new DependencyRegistry();
 
 		const orderRepository = new OrderRepositoryDatabase(
@@ -83,8 +88,8 @@ export class WebServer {
 		registry
 			.push("orderRepository", orderRepository)
 			.push("itemRepository", itemRepository)
-			.push("queue", queue)
-			.push("logger", logger)
+			.push("queue", this.queue)
+			.push("logger", this.logger)
 			.push("registerOrder", new RegisterOrder(registry))
 			.push("listOrders", new ListOrders(registry))
 			.push("registerItemCopy", new RegisterItemCopy(registry))
@@ -112,7 +117,7 @@ export class WebServer {
 			this.app.use("/", router);
 		});
 
-		this.app.get("/healthy", (req, res) => {
+		this.app.get("/healthy", (_, res) => {
 			res.send("Hello world!");
 		});
 	};

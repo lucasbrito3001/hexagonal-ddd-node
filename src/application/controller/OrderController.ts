@@ -65,6 +65,11 @@ export class OrderController {
 		try {
 			const { startDate, endDate } = req.query;
 
+			this.logger.logUseCase(
+				"ListOrders",
+				`Start date: ${startDate} / End date: ${endDate}`
+			);
+
 			if (!startDate || !endDate) throw new RequiredDateRangeError();
 
 			const orders = await this.listOrders.execute(

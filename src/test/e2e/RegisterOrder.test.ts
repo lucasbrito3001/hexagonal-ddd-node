@@ -1,10 +1,4 @@
-import {
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	test,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import request from "supertest";
 import { Express } from "express";
 import { WebServer } from "@/infra/Server";
@@ -12,17 +6,23 @@ import { DataSourceConnection } from "@/infra/DataSource";
 import { INPUT_ORDER, INPUT_USER } from "../constants";
 import { config } from "dotenv";
 import { UserEntity } from "@/infra/repository/entity/User.entity";
+import { RabbitMQAdapter } from "@/infra/queue/RabbitMQAdapter";
+import { GeneralLogger } from "@/infra/log/GeneralLogger";
 
 config();
 
 describe("/register_order", () => {
+	const logger = new GeneralLogger();
+	const queue = new RabbitMQAdapter(logger);
+	
 	let dataSourceConnection: DataSourceConnection;
 	let webServer: WebServer;
 	let app: Express;
 
 	beforeEach(async () => {
 		dataSourceConnection = new DataSourceConnection();
-		webServer = new WebServer(dataSourceConnection);
+
+		webServer = new WebServer(dataSourceConnection, queue, logger);
 
 		app = (await webServer.start(true)) as Express;
 

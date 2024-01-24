@@ -8,10 +8,15 @@ import { config } from "dotenv";
 import { UserEntity } from "@/infra/repository/entity/User.entity";
 import { OrderEntity } from "@/infra/repository/entity/Order.entity";
 import { Order } from "@/domain/entities/Order";
+import { GeneralLogger } from "@/infra/log/GeneralLogger";
+import { RabbitMQAdapter } from "@/infra/queue/RabbitMQAdapter";
 
 config();
 
 describe("/list_orders", () => {
+	const logger = new GeneralLogger();
+	const queue = new RabbitMQAdapter(logger);
+
 	let app: Express;
 	let webServer: WebServer;
 	let dataSourceConnection: DataSourceConnection;
@@ -22,7 +27,7 @@ describe("/list_orders", () => {
 
 	beforeEach(async () => {
 		dataSourceConnection = new DataSourceConnection();
-		webServer = new WebServer(dataSourceConnection);
+		webServer = new WebServer(dataSourceConnection, queue, logger);
 
 		app = (await webServer.start(true)) as Express;
 
