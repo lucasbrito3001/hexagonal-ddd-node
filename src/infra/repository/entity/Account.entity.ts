@@ -1,14 +1,14 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { OrderEntity } from "./Order.entity";
 
-@Entity("user")
-export class UserEntity {
+@Entity("account")
+export class AccountEntity {
 	@PrimaryColumn("uuid")
 	id?: string;
 	@Column({ type: "varchar", length: 24 })
-	first_name?: string;
+	firstName?: string;
 	@Column({ type: "varchar", length: 24 })
-	last_name?: string;
+	lastName?: string;
 	@Column({ type: "varchar" })
 	email?: string;
 	@OneToMany(() => OrderEntity, (order) => order.user)

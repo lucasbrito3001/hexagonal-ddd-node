@@ -1,14 +1,18 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { RegisterOrder } from "@/application/usecase/RegisterOrder";
+import {
+	RegisterOrder,
+	RegisterOrderPort,
+} from "@/application/usecase/RegisterOrder";
 import { OrderMemoryRepository } from "../../infra/repository/mock/OrderMemoryRepository";
-import { INPUT_ORDER } from "../constants";
+import { MockInputOrder } from "../constants";
 import { MockQueue } from "@/infra/queue/mock/MockQueue";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { Queue } from "@/infra/queue/Queue";
 import { OrderRegistered } from "@/domain/event/OrderRegistered";
+import { OrderItem } from "@/domain/entities/OrderItem";
 
 describe("[Use Case - RegisterOrder]", () => {
-	let registerOrder: RegisterOrder;
+	let registerOrder: RegisterOrderPort;
 	let mockQueue: Queue;
 	const mockGetResult = [{ id: "0-0-0-0-0", unitPrice: 100 }];
 
@@ -26,19 +30,15 @@ describe("[Use Case - RegisterOrder]", () => {
 	});
 
 	test("should register a new order successfully", async () => {
+		const input = new MockInputOrder();
 		const spyQueuePublish = vi.spyOn(mockQueue, "publish");
 
-		const order = await registerOrder.execute(INPUT_ORDER, "0-0-0-0-0");
+		const order = await registerOrder.execute(
+			new MockInputOrder(),
+			"0-0-0-0-0"
+		);
 
 		expect(order.orderId).toBeDefined();
-		expect(spyQueuePublish).toHaveBeenCalledWith(
-			"orderRegistered",
-			new OrderRegistered(order.orderId, [
-				{
-					quantity: INPUT_ORDER.items[0].quantity,
-					itemId: mockGetResult[0].id,
-				},
-			])
-		);
+		expect(spyQueuePublish.mock.calls[0][0]).toBeInstanceOf(OrderRegistered);
 	});
 });

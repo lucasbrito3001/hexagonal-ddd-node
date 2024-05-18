@@ -2,6 +2,7 @@ import amqp from "amqplib";
 import { Queue } from "./Queue";
 import { Logger } from "../log/Logger";
 import { QueueSubscriber } from "./subscriber/QueueSubscriber";
+import { Event } from "@/domain/Base";
 
 export class RabbitMQAdapter implements Queue {
 	connection: amqp.Connection | undefined;
@@ -45,13 +46,19 @@ export class RabbitMQAdapter implements Queue {
 		});
 	}
 
-	async publish(queueName: string, data: any): Promise<void> {
+	async publish(event: Event): Promise<void> {
 		if (this.connection === undefined) throw new Error("");
 
-		this.logger.logEvent(queueName, `Message: ${JSON.stringify(data)}`);
+		this.logger.logEvent(
+			event.queueName,
+			`Message: ${JSON.stringify(event.message)}`
+		);
 
 		const channel = await this.connection.createChannel();
-		await channel.assertQueue(queueName, { durable: true });
-		channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)));
+		await channel.assertQueue(event.queueName, { durable: true });
+		channel.sendToQueue(
+			event.queueName,
+			Buffer.from(JSON.stringify(event.message))
+		);
 	}
 }

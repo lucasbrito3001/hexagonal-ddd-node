@@ -1,7 +1,7 @@
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { QueueSubscriber } from "./QueueSubscriber";
 import { Logger } from "@/infra/log/Logger";
-import { BookStocked } from "@/domain/event/BookStocked";
+import { BookStockedMessage } from "@/domain/event/BookStocked";
 import { RegisterItemCopy } from "@/application/usecase/RegisterItemCopy";
 
 export class PriceUpdatedSub implements QueueSubscriber {
@@ -21,8 +21,13 @@ export class PriceUpdatedSub implements QueueSubscriber {
 		);
 	};
 
-	public callbackFunction = async (message: BookStocked) => {
-		this.logMessage(message.bookId);
-		this.useCase.execute(message);
+	public callbackFunction = async (message: BookStockedMessage) => {
+		try {
+			this.logMessage(message.bookId);
+			await this.useCase.execute(message);
+		} catch (error) {
+			const errorAny = error as any;
+			throw new Error(errorAny.message);
+		}
 	};
 }

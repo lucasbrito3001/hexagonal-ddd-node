@@ -1,3 +1,4 @@
+import { Event } from "@/domain/Base";
 import { Queue } from "../Queue";
 import { QueueSubscriber } from "../subscriber/QueueSubscriber";
 
@@ -12,7 +13,7 @@ export class MockQueue implements Queue {
 		this.queue.shift();
 	}
 
-	async publish(queueName: string, data: any): Promise<void> {
-		this.queue.push(data);
+	async publish(event: Event): Promise<void> {
+		this.queue.push(event.message);
 	}
 }

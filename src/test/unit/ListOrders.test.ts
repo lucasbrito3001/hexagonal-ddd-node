@@ -1,14 +1,17 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { ListOrders } from "@/application/usecase/ListOrders";
+import { ListOrders, ListOrdersPort } from "@/application/usecase/ListOrders";
 import { OrderMemoryRepository } from "../../infra/repository/mock/OrderMemoryRepository";
-import { INPUT_ORDER } from "../constants";
+import { MockInputOrder } from "../constants";
 import { Order } from "../../domain/entities/Order";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
-import { InvalidDateRangeError, OrderNotFoundError } from "@/error/OrderError";
+import {
+	InvalidDateRangeError,
+	OrderNotFoundBetweenDateRangeError,
+} from "@/error/OrderError";
 
 describe("[Use Case - ListOrders]", () => {
 	const registry = new DependencyRegistry();
-	let listOrders: ListOrders;
+	let listOrders: ListOrdersPort;
 	let orderMemoryRepository: OrderMemoryRepository;
 
 	beforeEach(() => {
@@ -28,13 +31,13 @@ describe("[Use Case - ListOrders]", () => {
 		expect(fn).rejects.toBeInstanceOf(InvalidDateRangeError);
 	});
 
-	test("should return OrderNotFoundError when don't have orders in the range", async () => {
+	test("should return OrderNotFoundBetweenDateRangeError when don't have orders in the range", async () => {
 		const startDate = new Date("2023-01-02");
 		const endDate = new Date("2023-01-03");
 
 		const fn = () => listOrders.execute(startDate, endDate);
 
-		expect(fn).rejects.toBeInstanceOf(OrderNotFoundError);
+		expect(fn).rejects.toBeInstanceOf(OrderNotFoundBetweenDateRangeError);
 	});
 
 	test("should list orders successfully", async () => {
@@ -46,7 +49,7 @@ describe("[Use Case - ListOrders]", () => {
 		const endDate = new Date(currentDate);
 		endDate.setDate(endDate.getDate() + 1);
 
-		const order = Order.register(INPUT_ORDER, "0", () => "0-0-0-0-0");
+		const order = Order.register(new MockInputOrder(), "0", () => "0-0-0-0-0");
 		await orderMemoryRepository.save(order);
 
 		const orders = (await listOrders.execute(startDate, endDate)) as Order[];

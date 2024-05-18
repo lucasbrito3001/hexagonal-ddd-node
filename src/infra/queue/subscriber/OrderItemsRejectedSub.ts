@@ -1,6 +1,9 @@
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { QueueSubscriber } from "./QueueSubscriber";
-import { OrderItemsApprovedOrRejected } from "@/domain/event/OrderItemsApprovedOrRejected";
+import {
+	OrderItemsApproved,
+	OrderItemsApprovedOrRejectedMessage,
+} from "@/domain/event/OrderItemsApprovedOrRejected";
 import { Logger } from "@/infra/log/Logger";
 import { RejectOrderItems } from "@/application/usecase/RejectOrderItems";
 
@@ -21,8 +24,15 @@ export class RejectOrderItemsSub implements QueueSubscriber {
 		);
 	};
 
-	public callbackFunction = async (message: OrderItemsApprovedOrRejected) => {
-		this.logMessage(message.orderId);
-		this.useCase.execute(message);
+	public callbackFunction = async (
+		message: OrderItemsApprovedOrRejectedMessage
+	) => {
+		try {
+			this.logMessage(message.orderId);
+			await this.useCase.execute(message);
+		} catch (error) {
+			const errorAny = error as any;
+			throw new Error(errorAny.message);
+		}
 	};
 }

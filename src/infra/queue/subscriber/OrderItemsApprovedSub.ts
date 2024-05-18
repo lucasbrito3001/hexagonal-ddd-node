@@ -1,10 +1,10 @@
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { QueueSubscriber } from "./QueueSubscriber";
 import { ApproveOrderItems } from "@/application/usecase/ApproveOrderItems";
-import { OrderItemsApprovedOrRejected } from "@/domain/event/OrderItemsApprovedOrRejected";
+import { OrderItemsApprovedOrRejectedMessage } from "@/domain/event/OrderItemsApprovedOrRejected";
 import { Logger } from "@/infra/log/Logger";
 
-export class ApproveOrderItemsSub implements QueueSubscriber {
+export class OrderItemsApprovedSub implements QueueSubscriber {
 	public queueName = "orderItemsApproved";
 	private readonly useCase: ApproveOrderItems;
 	private logger: Logger;
@@ -21,8 +21,15 @@ export class ApproveOrderItemsSub implements QueueSubscriber {
 		);
 	};
 
-	public callbackFunction = async (message: OrderItemsApprovedOrRejected) => {
-		this.logMessage(message.orderId);
-		this.useCase.execute(message);
+	public callbackFunction = async (
+		message: OrderItemsApprovedOrRejectedMessage
+	) => {
+		try {
+			this.logMessage(message.orderId);
+			await this.useCase.execute(message);
+		} catch (error) {
+			const errorAny = error as any;
+			throw new Error(errorAny.message);
+		}
 	};
 }

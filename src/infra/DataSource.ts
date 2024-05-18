@@ -7,7 +7,7 @@ import {
 } from "typeorm";
 import { OrderEntity } from "./repository/entity/Order.entity";
 import { OrderItemEntity } from "./repository/entity/OrderItem.entity";
-import { UserEntity } from "./repository/entity/User.entity";
+import { AccountEntity } from "./repository/entity/Account.entity";
 import { ItemEntity } from "./repository/entity/Item.entity";
 import { GeneralLogger } from "./log/GeneralLogger";
 import { Logger } from "./log/Logger";
@@ -50,8 +50,8 @@ export class DataSourceConnection {
 			username: process.env.DS_USER || "",
 			password: process.env.DS_PASS || "",
 			database: process.env.DS_DATABASE || "",
-			entities: [OrderEntity, OrderItemEntity, UserEntity, ItemEntity],
-			// synchronize: process.env.NODE_ENV !== "prd",
+			entities: [join(__dirname, "repository", "entity", "*.entity.ts")],
+			synchronize: process.env.NODE_ENV !== "prd",
 			// logging: process.env.NODE_ENV !== "prd",
 		};
 
@@ -60,12 +60,14 @@ export class DataSourceConnection {
 			database: ":memory:",
 			dropSchema: true,
 			synchronize: true,
-			entities: [UserEntity, OrderEntity, ItemEntity, OrderItemEntity],
+			entities: [AccountEntity, OrderEntity, ItemEntity, OrderItemEntity],
 		};
 
-		if (Object.values(options).some((opt) => !opt)) return undefined;
+		const config = process.env.NODE_ENV === "e2e" ? optionsTest : options;
 
-		return process.env.NODE_ENV === "e2e" ? optionsTest : options;
+		if (Object.values(config).some((opt) => !opt)) return undefined;
+
+		return config;
 	}
 
 	async initialize(): Promise<void> {

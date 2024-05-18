@@ -1,9 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { RegisterOrderDTO } from "@/application/controller/dto/RegisterOrderDto";
-import {
-	OrderPaymentMethods,
-	OrderStatus,
-} from "@/infra/repository/entity/Order.entity";
+import { OrderStatus } from "@/infra/repository/entity/Order.entity";
 import { OrderItem } from "./OrderItem";
 
 export class Order {
@@ -12,7 +9,6 @@ export class Order {
 		public user: string,
 		public items: OrderItem[],
 		public status: OrderStatus,
-		public paymentMethod: OrderPaymentMethods,
 		public totalCost: number,
 		public createdAt: string
 	) {}
@@ -42,8 +38,7 @@ export class Order {
 			id,
 			user,
 			orderItems,
-			OrderStatus.Pending,
-			registerOrderDTO.paymentMethod,
+			OrderStatus.PendingStockValidation,
 			totalCost,
 			createdAt
 		);
@@ -56,55 +51,55 @@ export class Order {
 		user: string,
 		items: OrderItem[],
 		status: OrderStatus,
-		paymentMethod: OrderPaymentMethods,
 		totalCost: number,
 		createdAt: string
 	) => {
-		return new Order(
-			id,
-			user,
-			items || [],
-			status,
-			paymentMethod,
-			totalCost,
-			createdAt
-		);
+		return new Order(id, user, items || [], status, totalCost, createdAt);
 	};
 
 	static approveOrderItems = (order: Order) => {
-		const status = OrderStatus.ItemsApproved;
+		const status = OrderStatus.PendingPaymentValidation;
 		return new Order(
 			order.id,
 			order.user,
 			order.items,
 			status,
-			order.paymentMethod,
 			order.totalCost,
 			order.createdAt
 		);
 	};
 
 	static rejectOrderItems = (order: Order) => {
-		const status = OrderStatus.ItemsRejected;
+		const status = OrderStatus.RejectedStockValidation;
 		return new Order(
 			order.id,
 			order.user,
 			order.items,
 			status,
-			order.paymentMethod,
 			order.totalCost,
 			order.createdAt
 		);
 	};
 
 	static approvePayment = (order: Order) => {
-		const status = OrderStatus.PaymentApproved;
+		const status = OrderStatus.Processing;
 		return new Order(
 			order.id,
 			order.user,
 			order.items,
 			status,
-			order.paymentMethod,
+			order.totalCost,
+			order.createdAt
+		);
+	};
+
+	static rejectPayment = (order: Order) => {
+		const status = OrderStatus.RejectedPaymentValidation;
+		return new Order(
+			order.id,
+			order.user,
+			order.items,
+			status,
 			order.totalCost,
 			order.createdAt
 		);
