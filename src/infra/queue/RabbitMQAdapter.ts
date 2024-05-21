@@ -30,7 +30,11 @@ export class RabbitMQAdapter implements Queue {
 
 		try {
 			const channel = await this.connection.createChannel();
-			await channel.assertQueue(subscriber.queueName, { durable: true });
+			await channel.assertQueue(subscriber.queueName, {
+				durable: true,
+				messageTtl: 5000,
+				deadLetterExchange: `dlx-${subscriber.queueName}`,
+			});
 
 			channel.consume(subscriber.queueName, async (msg: any) => {
 				try {
