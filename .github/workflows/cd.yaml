@@ -1,0 +1,7 @@
+name: pipeline_cd
+run-name: Pipeline CD - v1.0
+
+on:
+  push:
+    branches:
+      - main
