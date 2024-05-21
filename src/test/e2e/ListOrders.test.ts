@@ -3,9 +3,9 @@ import request from "supertest";
 import { Express } from "express";
 import { WebServer } from "@/infra/Server";
 import { DataSourceConnection } from "@/infra/DataSource";
-import { INPUT_ORDER, INPUT_USER } from "../constants";
+import { MockInputOrder, MockInputUser } from "../constants";
 import { config } from "dotenv";
-import { UserEntity } from "@/infra/repository/entity/User.entity";
+import { AccountEntity } from "@/infra/repository/entity/Account.entity";
 import { OrderEntity } from "@/infra/repository/entity/Order.entity";
 import { Order } from "@/domain/entities/Order";
 import { GeneralLogger } from "@/infra/log/GeneralLogger";
@@ -31,8 +31,8 @@ describe("/list_orders", () => {
 
 		app = (await webServer.start(true)) as Express;
 
-		const userRepo = dataSourceConnection.getRepository(UserEntity);
-		await userRepo.save(INPUT_USER);
+		const userRepo = dataSourceConnection.getRepository(AccountEntity);
+		await userRepo.save(new MockInputUser());
 	});
 
 	afterEach(() => {
@@ -41,7 +41,7 @@ describe("/list_orders", () => {
 
 	test("should list orders successfully", async () => {
 		const orderRepo = dataSourceConnection.getRepository(OrderEntity);
-		const order = Order.register(INPUT_ORDER, INPUT_USER.id);
+		const order = Order.register(new MockInputOrder(), new MockInputUser().id);
 		await orderRepo.save(order);
 
 		const response = await request(app)

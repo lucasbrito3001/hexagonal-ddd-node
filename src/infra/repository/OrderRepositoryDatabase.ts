@@ -1,11 +1,6 @@
 import { Between, Repository } from "typeorm";
-import { RegisterOrderDTO } from "../../application/controller/dto/RegisterOrderDto";
 import { OrderRepository } from "@/application/repository/OrderRepository";
-import {
-	OrderEntity,
-	OrderPaymentMethods,
-	OrderStatus,
-} from "./entity/Order.entity";
+import { OrderEntity, OrderStatus } from "./entity/Order.entity";
 import { Order } from "@/domain/entities/Order";
 import { OrderItem } from "@/domain/entities/OrderItem";
 
@@ -28,7 +23,6 @@ export class OrderRepositoryDatabase implements OrderRepository {
 			orderEntity?.user as string,
 			orderEntity?.items as OrderItem[],
 			orderEntity?.status as OrderStatus,
-			orderEntity?.paymentMethod as OrderPaymentMethods,
 			orderEntity?.totalCost as number,
 			orderEntity?.createdAt as string
 		);
@@ -55,7 +49,6 @@ export class OrderRepositoryDatabase implements OrderRepository {
 				orderEntity.user as string,
 				orderEntity.items as OrderItem[],
 				orderEntity.status as OrderStatus,
-				orderEntity.paymentMethod as OrderPaymentMethods,
 				orderEntity.totalCost as number,
 				orderEntity.createdAt as string
 			)

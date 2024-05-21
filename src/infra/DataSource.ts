@@ -7,7 +7,7 @@ import {
 } from "typeorm";
 import { OrderEntity } from "./repository/entity/Order.entity";
 import { OrderItemEntity } from "./repository/entity/OrderItem.entity";
-import { UserEntity } from "./repository/entity/User.entity";
+import { AccountEntity } from "./repository/entity/Account.entity";
 import { ItemEntity } from "./repository/entity/Item.entity";
 import { GeneralLogger } from "./log/GeneralLogger";
 import { Logger } from "./log/Logger";
@@ -45,27 +45,15 @@ export class DataSourceConnection {
 	getConfig(): DataSourceOptions | undefined {
 		const options: DataSourceOptions = {
 			type: "mysql",
-			port: 3306,
-			host: process.env.DS_HOST || "",
-			username: process.env.DS_USER || "",
-			password: process.env.DS_PASS || "",
-			database: process.env.DS_DATABASE || "",
-			entities: [OrderEntity, OrderItemEntity, UserEntity, ItemEntity],
-			// synchronize: process.env.NODE_ENV !== "prd",
-			// logging: process.env.NODE_ENV !== "prd",
+			url: process.env.DB_CONNECTION_STRING || "",
+			entities: [join(__dirname, "..", "repository", "entity", "*.entity.ts")],
+			synchronize: process.env.NODE_ENV !== "prd",
+			logging: process.env.NODE_ENV !== "prd",
 		};
 
-		const optionsTest: DataSourceOptions = {
-			type: "sqlite",
-			database: ":memory:",
-			dropSchema: true,
-			synchronize: true,
-			entities: [UserEntity, OrderEntity, ItemEntity, OrderItemEntity],
-		};
+		const config = options;
 
-		if (Object.values(options).some((opt) => !opt)) return undefined;
-
-		return process.env.NODE_ENV === "e2e" ? optionsTest : options;
+		return config;
 	}
 
 	async initialize(): Promise<void> {

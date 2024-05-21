@@ -1,4 +1,3 @@
-import { RegisterOrderPort } from "./interfaces/RegisterOrderPort";
 import { Order } from "@/domain/entities/Order";
 import { RegisterOrderDTO } from "../controller/dto/RegisterOrderDto";
 import { OrderRepository } from "../repository/OrderRepository";
@@ -6,6 +5,11 @@ import { OrderRegistered } from "@/domain/event/OrderRegistered";
 import { Queue } from "@/infra/queue/Queue";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { ItemRepository } from "../repository/ItemRepository";
+import { OrderItemNotFoundError } from "@/error/OrderItemError";
+
+export interface RegisterOrderPort {
+	execute(registerOrderDTO: RegisterOrderDTO, userId: string): Promise<Output>;
+}
 
 export class RegisterOrder implements RegisterOrderPort {
 	private readonly orderRepository: OrderRepository;
@@ -22,7 +26,6 @@ export class RegisterOrder implements RegisterOrderPort {
 		registerOrderDTO: RegisterOrderDTO,
 		userId: string
 	): Promise<Output> {
-		const itemsDTO = JSON.parse(JSON.stringify(registerOrderDTO.items));
 		const itemIds = registerOrderDTO.items.map((item) => item.itemId);
 		const itemPrices = await this.itemRepository.get(itemIds);
 
@@ -30,6 +33,8 @@ export class RegisterOrder implements RegisterOrderPort {
 			const itemPrice = itemPrices.find(
 				(itemPrice) => itemPrice.id === item.itemId
 			);
+
+			if (itemPrice === undefined) throw new OrderItemNotFoundError();
 
 			item.unitPrice = +(itemPrice?.unitPrice || 0);
 
@@ -41,8 +46,7 @@ export class RegisterOrder implements RegisterOrderPort {
 		await this.orderRepository.save(order);
 
 		await this.queue.publish(
-			"orderRegistered",
-			new OrderRegistered(order.id, itemsDTO)
+			OrderRegistered.create(order.id, order.items, order.user, order.totalCost)
 		);
 
 		return { orderId: order.id };

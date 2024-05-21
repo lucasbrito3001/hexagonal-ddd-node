@@ -1,4 +1,3 @@
-import { ListOrdersPort } from "./interfaces/ListOrdersPort";
 import { Order } from "@/domain/entities/Order";
 import { OrderRepository } from "../repository/OrderRepository";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
@@ -6,6 +5,10 @@ import {
 	InvalidDateRangeError,
 	OrderNotFoundBetweenDateRangeError,
 } from "@/error/OrderError";
+
+export interface ListOrdersPort {
+	execute(startDate: Date, endDate: Date): Promise<Order[]>;
+}
 
 export class ListOrders implements ListOrdersPort {
 	private readonly orderRepository: OrderRepository;

@@ -1,4 +1,3 @@
-import { OrderEntity } from "@/infra/repository/entity/Order.entity";
 import { Order } from "../../domain/entities/Order";
 
 export interface OrderRepository {

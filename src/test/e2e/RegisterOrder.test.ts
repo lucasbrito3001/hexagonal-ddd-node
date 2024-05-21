@@ -3,9 +3,9 @@ import request from "supertest";
 import { Express } from "express";
 import { WebServer } from "@/infra/Server";
 import { DataSourceConnection } from "@/infra/DataSource";
-import { INPUT_ORDER, INPUT_USER } from "../constants";
+import { MockInputOrder, MockInputUser } from "../constants";
 import { config } from "dotenv";
-import { UserEntity } from "@/infra/repository/entity/User.entity";
+import { AccountEntity } from "@/infra/repository/entity/Account.entity";
 import { RabbitMQAdapter } from "@/infra/queue/RabbitMQAdapter";
 import { GeneralLogger } from "@/infra/log/GeneralLogger";
 
@@ -14,7 +14,7 @@ config();
 describe("/register_order", () => {
 	const logger = new GeneralLogger();
 	const queue = new RabbitMQAdapter(logger);
-	
+
 	let dataSourceConnection: DataSourceConnection;
 	let webServer: WebServer;
 	let app: Express;
@@ -26,8 +26,8 @@ describe("/register_order", () => {
 
 		app = (await webServer.start(true)) as Express;
 
-		const userRepo = dataSourceConnection.getRepository(UserEntity);
-		await userRepo.save(INPUT_USER);
+		const userRepo = dataSourceConnection.getRepository(AccountEntity);
+		await userRepo.save(new MockInputUser());
 	});
 
 	afterEach(() => {
@@ -37,8 +37,10 @@ describe("/register_order", () => {
 	test("should register a new order successfully", async () => {
 		const response = await request(app)
 			.post("/register_order")
-			.send(INPUT_ORDER)
+			.send(new MockInputOrder())
 			.set("Accept", "application/json");
+
+		console.log(response);
 
 		expect(response.status).toBe(201);
 		expect(response.body.orderId).toBeDefined();

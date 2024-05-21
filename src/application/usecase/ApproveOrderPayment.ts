@@ -1,9 +1,12 @@
 import { OrderPaymentApproved } from "@/domain/event/OrderPaymentApproved";
-import { ApproveOrderPaymentPort } from "./interfaces/ApproveOrderPaymentPort";
 import { OrderRepository } from "../repository/OrderRepository";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { OrderNotFoundError } from "@/error/OrderError";
 import { Order } from "@/domain/entities/Order";
+
+export interface ApproveOrderPaymentPort {
+	execute(message: OrderPaymentApproved): Promise<void>;
+}
 
 export class ApproveOrderPayment implements ApproveOrderPaymentPort {
 	private readonly orderRepository: OrderRepository;

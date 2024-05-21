@@ -7,11 +7,18 @@ import {
 	RequiredDateRangeError,
 } from "../../error/OrderError";
 import { NextFunction, Request, Response } from "express";
-import { RegisterOrderPort } from "@/application/usecase/interfaces/RegisterOrderPort";
-import { ListOrdersPort } from "@/application/usecase/interfaces/ListOrdersPort";
-import { UnexpectedError } from "@/error/ErrorBase";
 import { DependencyRegistry } from "@/infra/DependencyRegistry";
 import { Logger } from "@/infra/log/Logger";
+import { RegisterOrderPort } from "../usecase/RegisterOrder";
+import { ListOrdersPort } from "../usecase/ListOrders";
+
+export type JwtPayload = {
+	firebaseId: string;
+	accountId: string;
+	email: string;
+	iat: number;
+	exp: number;
+};
 
 export class OrderController {
 	private readonly registerOrder: RegisterOrderPort;
@@ -30,14 +37,20 @@ export class OrderController {
 		next: NextFunction
 	): Promise<any> => {
 		try {
-			const registerOrderDTO: RegisterOrderDTO = req.body;
-			const userId: string = "3a5e8426-8265-418b-9ade-a82d0f69ec42";
+			const reqBody: {
+				jwtPayload: JwtPayload;
+				items: RegisterOrderDTO["items"];
+			} = req.body;
 
+			const { jwtPayload, items } = reqBody;
+
+			const registerOrderDTO = { items };
+			// const userId: string = "3a5e8426-8265-418b-9ade-a82d0f69ec42";
+
+			console.log(jwtPayload);
 			this.logger.logUseCase(
 				"RegisterOrder",
-				`Payment method: ${
-					registerOrderDTO.paymentMethod
-				} / items: ${registerOrderDTO.items?.reduce(
+				`Items: ${registerOrderDTO.items?.reduce(
 					(acc, item) => (acc += `\n| ${item.itemId} - ${item.quantity}`),
 					""
 				)}`
@@ -49,7 +62,10 @@ export class OrderController {
 			if (!schemaValidation.success)
 				throw new InvalidOrderInputError(schemaValidation.error.issues);
 
-			const order = await this.registerOrder.execute(registerOrderDTO, userId);
+			const order = await this.registerOrder.execute(
+				registerOrderDTO,
+				jwtPayload.accountId
+			);
 
 			return res.status(201).json(order);
 		} catch (error) {
@@ -78,6 +94,17 @@ export class OrderController {
 			);
 
 			res.status(200).json(orders);
+		} catch (error) {
+			next(error);
+		}
+	};
+
+	confirmReception = async (
+		req: Request,
+		res: Response,
+		next: NextFunction
+	) => {
+		try {
 		} catch (error) {
 			next(error);
 		}
