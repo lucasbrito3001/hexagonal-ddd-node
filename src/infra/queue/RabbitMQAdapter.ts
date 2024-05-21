@@ -28,16 +28,22 @@ export class RabbitMQAdapter implements Queue {
 
 		this.logger.logSubscriber(subscriber.queueName);
 
-		const channel = await this.connection.createChannel();
-		await channel.assertQueue(subscriber.queueName, { durable: true });
-		channel.consume(subscriber.queueName, async (msg: any) => {
-			try {
-				await subscriber.callbackFunction(JSON.parse(msg.content.toString()));
-				channel.ack(msg);
-			} catch (error) {
-				throw new Error("Error to consume queue: " + error);
-			}
-		});
+		try {
+			const channel = await this.connection.createChannel();
+			await channel.assertQueue(subscriber.queueName, { durable: true });
+
+			channel.consume(subscriber.queueName, async (msg: any) => {
+				try {
+					await subscriber.callbackFunction(JSON.parse(msg.content.toString()));
+					channel.ack(msg);
+				} catch (error) {
+					throw new Error("Error to consume queue: " + error);
+				}
+			});
+		} catch (error) {
+			console.log(error);
+			throw new Error("Error to subscribe to queue: " + error);
+		}
 	}
 
 	async publish(event: Event): Promise<void> {
